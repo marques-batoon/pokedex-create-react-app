@@ -15,6 +15,25 @@ class PokemonList extends React.Component {
         }
     }
 
+    componentDidMount() {
+        this.getPokemonList();
+    }
+
+    getPokemonList = () => {
+        const{ region } = this.state;
+        console.log("LIST!");
+        fetch(`https://pokeapi.co/api/v2/region/${region}`)
+        .then(checkStatus)
+        .then(json)
+        .then(data => {
+            if(data.error) {
+                throw new Error(data.error);
+            }
+            console.log(data.main_generation.url);
+        })
+        .catch(error => console.log(error.message));
+    }
+
     render() {
         const{ region } = this.state;
 
