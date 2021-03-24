@@ -21,7 +21,6 @@ class PokemonList extends React.Component {
 
     getPokemonList = () => {
         const{ region } = this.state;
-        console.log("LIST!");
         fetch(`https://pokeapi.co/api/v2/region/${region}`)
         .then(checkStatus)
         .then(json)
@@ -30,6 +29,18 @@ class PokemonList extends React.Component {
                 throw new Error(data.error);
             }
             console.log(data.main_generation.url);
+            fetch(data.main_generation.url)
+            .then(checkStatus)
+            .then(json)
+            .then(data1 => {
+                if(data1.error) {
+                    throw new Error(data.error);
+                }
+                console.log(data1.pokemon_species);
+                console.log(data1.pokemon_species[0]);
+                this.setState({ mons: data1.pokemon_species });
+            })
+            .catch(error => console.log(error.message));
         })
         .catch(error => console.log(error.message));
     }
@@ -40,6 +51,7 @@ class PokemonList extends React.Component {
         return(
             <React.Fragment>
                 <h1>{region}</h1>
+                
             </React.Fragment>
         )
     }

@@ -19,7 +19,7 @@ class Home extends React.Component {
         event.preventDefault();
         this.setState({ regionClick: event.target.value });
 
-        const waitSecs = 500 // 0.5 seconds
+        const waitSecs = 250 // 0.25 seconds
         setTimeout(() => {
           window.location.href=`/pokemonlist?region=${event.target.value}`;
         },waitSecs);
