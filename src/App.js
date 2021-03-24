@@ -12,7 +12,8 @@ const App = () => {
       <Layout>
         <Switch>
           <Route path="/" exact component={Home} />
-          <Route path="/PokemonList" component={PokemonList} />
+          <Route path="/pokemonlist" component={PokemonList} />
+          <Route path="/pokemon" render={() => <h1>Pokemon</h1>} />
           <Route render={() => <h1>404 Not Found</h1>} />
         </Switch>
       </Layout>
