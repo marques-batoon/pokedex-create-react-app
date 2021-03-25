@@ -74,10 +74,28 @@ class PokemonList extends React.Component {
             if(data.error) {
                 throw new Error(data.error);
             }
-            console.log(data.results);
             this.setState({ mons: data.results });
         })
         .catch(error => console.log(error.message));
+    }
+
+    getSprite = (namae) => {
+        fetch(`https://pokeapi.co/api/v2/pokemon/${namae}`)
+        .then(checkStatus)
+        .then(json)
+        .then(data => {
+            if(data.error) {
+                throw new Error(data.error);
+            }
+            console.log(data.sprites["front_default"]);
+            return data.sprites["front_default"];
+        })
+        .catch(error => console.log(error.message));
+    }
+
+    topFunction = () => {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
     }
 
     render() {
@@ -87,8 +105,10 @@ class PokemonList extends React.Component {
             <React.Fragment>
                 <h1>{region}</h1>
                 <div className="list-group">
-                    {mons.map(mon => <Link to={`/pokemon?name=${monName}`}key={mon.name}><button type="button" className="list-group-item list-group-item-action text-center" value={mon.name} onClick={this.clickedMon}>{mon.name}</button></Link>)}
+                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}>{mon.name}</button>
+                    )}
                 </div>
+                <button onClick={this.topFunction}>Top</button>
             </React.Fragment>
         )
     }

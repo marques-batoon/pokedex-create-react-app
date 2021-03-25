@@ -26,7 +26,7 @@ class Pokemon extends React.Component {
             if(data.error) {
                 throw new Error(data.error);
             }
-            console.log(data.sprites.other["official-artwork"]["front_default"]);
+            //console.log(data.sprites.other["official-artwork"]["front_default"]);
             this.setState({ imgLink: data.sprites.other["official-artwork"]["front_default"] });
         })
         .catch(error => console.log(error.message));
