@@ -30,7 +30,7 @@ class PokemonList extends React.Component {
 
         const waitSecs = 250 // 0.25 seconds
         setTimeout(() => {
-          window.location.href=`/pokemon?mon=${event.target.value}`;
+          window.location.href=`/pokemon?name=${event.target.value}`;
         },waitSecs);
     }
 

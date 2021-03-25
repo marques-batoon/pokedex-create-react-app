@@ -5,3 +5,9 @@ footer a {
   font-weight: 300;
   transition: all 0.5s ease;
 }
+
+@media (max-width: 600px) {
+  img {
+    width: 100%;
+  }
+}
