@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 library.add(fab);
 
 const Layout = (props) => {
+
     return (
         <React.Fragment>
             <nav className="navbar navbar-light bg-light">
@@ -15,6 +16,7 @@ const Layout = (props) => {
             <div className="container py-3">
                 {props.children}
             </div>
+            
             <footer className="page-footer py-3 bg-light">
                 <div className="container-fluid">
                     <div className="row justify-content-center">
