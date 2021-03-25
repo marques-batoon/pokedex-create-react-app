@@ -5,6 +5,7 @@ import Home from './Home';
 import PokemonList from './PokemonList';
 
 import './App.css';
+import Pokemon from './Pokemon';
 
 const App = () => {
   return(
@@ -13,7 +14,7 @@ const App = () => {
         <Switch>
           <Route path="/" exact component={Home} />
           <Route path="/pokemonlist" component={PokemonList} />
-          <Route path="/pokemon" render={() => <h1>Pokemon</h1>} />
+          <Route path="/pokemon" component={Pokemon} />
           <Route render={() => <h1>404 Not Found</h1>} />
         </Switch>
       </Layout>
