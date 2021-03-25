@@ -14,6 +14,9 @@ class PokemonList extends React.Component {
             mons: [],
             region: params.get('region') || 'kanto',
             monName: '',
+            listLink: '',
+            listLink2: '',
+            monNum: 0,
         }
     }
 
@@ -40,7 +43,6 @@ class PokemonList extends React.Component {
             if(data.error) {
                 throw new Error(data.error);
             }
-            console.log(data.main_generation.url);
             this.setState({ listLink: data.main_generation.url });
             this.getList();
         })
@@ -48,7 +50,6 @@ class PokemonList extends React.Component {
     }
 
     getList = () => {
-        console.log(this.state.listLink);
         fetch(this.state.listLink)
         .then(checkStatus)
         .then(json)
@@ -56,10 +57,27 @@ class PokemonList extends React.Component {
             if(data.error) {
                 throw new Error(data.error);
             }
-            console.log(data.pokemon_species);
-            this.setState({ mons: data.pokemon_species });
-            
+            this.setState({ monNum: data.pokemon_species.length });
+            const mon0 = data.pokemon_species[0].url;
+            let startNum = mon0.substring(mon0.lastIndexOf("species") + 8, mon0.lastIndexOf("/")) - 1;
+            this.setState({ listLink2: `https://pokeapi.co/api/v2/pokemon?limit=${this.state.monNum}&offset=${startNum}` });
+            this.getList2();
         })
+        .catch(error => console.log(error.message));
+    }
+
+    getList2 = () => {
+        fetch(this.state.listLink2)
+        .then(checkStatus)
+        .then(json)
+        .then(data => {
+            if(data.error) {
+                throw new Error(data.error);
+            }
+            console.log(data.results);
+            this.setState({ mons: data.results });
+        })
+        .catch(error => console.log(error.message));
     }
 
     render() {
@@ -69,7 +87,7 @@ class PokemonList extends React.Component {
             <React.Fragment>
                 <h1>{region}</h1>
                 <div className="list-group">
-                {mons.map(mon => <Link to={`/pokemon?name=${monName}`}key={mon.name}><button type="button" className="list-group-item list-group-item-action text-center" value={mon.name} onClick={this.clickedMon}>{mon.name}</button></Link>)}
+                    {mons.map(mon => <Link to={`/pokemon?name=${monName}`}key={mon.name}><button type="button" className="list-group-item list-group-item-action text-center" value={mon.name} onClick={this.clickedMon}>{mon.name}</button></Link>)}
                 </div>
             </React.Fragment>
         )
