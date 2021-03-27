@@ -13,6 +13,7 @@ class Pokemon extends React.Component {
             name: params.get('name') || 'MissingNo.',
             pokeNum: '',
             imgLink: '',
+            nextMon: '',
         }
         this.chartRef = React.createRef();
     }
@@ -39,6 +40,20 @@ class Pokemon extends React.Component {
             const mon0 = data.species.url;
             const pokeNum = mon0.substring(mon0.lastIndexOf("species") + 8, mon0.lastIndexOf("/"));
             this.setState({ pokeNum });
+            this.toNext(1 + parseInt(pokeNum));
+        })
+        .catch(error => console.log(error.message));
+    }
+
+    toNext = (num) => {
+        fetch(`https://pokeapi.co/api/v2/pokemon/${num}`)
+        .then(checkStatus)
+        .then(json)
+        .then(data => {
+            if(data.error) {
+                throw new Error(data.error);
+            }
+            this.setState({ nextMon: data.name });
         })
         .catch(error => console.log(error.message));
     }
@@ -76,17 +91,25 @@ class Pokemon extends React.Component {
         });
     }    
 
+    refreshpage = () => {
+        const waitSecs = 100 // 0.1 seconds
+        setTimeout(() => {
+          window.location.href=`/pokemon?name=${this.state.nextMon}`;
+        },waitSecs);
+    }
+
     render() {
-        const{ name, imgLink } = this.state;
+        const{ name, imgLink, nextMon } = this.state;
 
         return(
             <React.Fragment>
-                <h1>{name}</h1>
                 <div className="container">
-                    <div className="row justify-content-end">
-                        <p>Next</p>
+                    <div className="row justify-content-between">
+                    <button>Prev</button>
+                        <button onClick={this.refreshpage}>Next</button>
                     </div>
                 </div>
+                <h1>{name}</h1>
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-12 row justify-content-center">
