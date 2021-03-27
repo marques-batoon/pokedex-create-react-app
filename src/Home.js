@@ -34,6 +34,7 @@ class Home extends React.Component {
                 throw new Error(data.error);
             }
             const regions = data.results;
+            console.log(data.results);
             this.setState({ regions });
             //console.log(regions[0].name);
         })
