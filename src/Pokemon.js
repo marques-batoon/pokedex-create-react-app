@@ -14,6 +14,7 @@ class Pokemon extends React.Component {
             pokeNum: '',
             imgLink: '',
             nextMon: '',
+            prevMon: '',
         }
         this.chartRef = React.createRef();
     }
@@ -41,6 +42,7 @@ class Pokemon extends React.Component {
             const pokeNum = mon0.substring(mon0.lastIndexOf("species") + 8, mon0.lastIndexOf("/"));
             this.setState({ pokeNum });
             this.toNext(1 + parseInt(pokeNum));
+            this.toPrev(parseInt(pokeNum) - 1);
         })
         .catch(error => console.log(error.message));
     }
@@ -54,6 +56,19 @@ class Pokemon extends React.Component {
                 throw new Error(data.error);
             }
             this.setState({ nextMon: data.name });
+        })
+        .catch(error => console.log(error.message));
+    }
+
+    toPrev = (num) => {
+        fetch(`https://pokeapi.co/api/v2/pokemon/${num}`)
+        .then(checkStatus)
+        .then(json)
+        .then(data => {
+            if(data.error) {
+                throw new Error(data.error);
+            }
+            this.setState({ prevMon: data.name });
         })
         .catch(error => console.log(error.message));
     }
@@ -91,10 +106,17 @@ class Pokemon extends React.Component {
         });
     }    
 
-    refreshpage = () => {
+    nextPokemon = () => {
         const waitSecs = 100 // 0.1 seconds
         setTimeout(() => {
           window.location.href=`/pokemon?name=${this.state.nextMon}`;
+        },waitSecs);
+    }
+
+    prevPokemon = () => {
+        const waitSecs = 100 // 0.1 seconds
+        setTimeout(() => {
+          window.location.href=`/pokemon?name=${this.state.prevMon}`;
         },waitSecs);
     }
 
@@ -105,8 +127,8 @@ class Pokemon extends React.Component {
             <React.Fragment>
                 <div className="container">
                     <div className="row justify-content-between">
-                    <button>Prev</button>
-                        <button onClick={this.refreshpage}>Next</button>
+                        <button onClick={this.prevPokemon}>Prev</button>
+                        <button onClick={this.nextPokemon}>Next</button>
                     </div>
                 </div>
                 <h1>{name}</h1>
