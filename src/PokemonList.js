@@ -10,6 +10,8 @@ class PokemonList extends React.Component {
 
         //console.log(params.get('region'));
 
+        this.counter = 0;
+
         this.state={
             mons: [],
             region: params.get('region') || 'kanto',
@@ -25,10 +27,10 @@ class PokemonList extends React.Component {
     }
 
     clickedMon = (event) => {
-        event.preventDefault();
+        //event.preventDefault();
         this.setState({ monName: event.target.value });
 
-        const waitSecs = 250 // 0.25 seconds
+        const waitSecs = 100 // 0.1 seconds
         setTimeout(() => {
           window.location.href=`/pokemon?name=${event.target.value}`;
         },waitSecs);
@@ -60,6 +62,7 @@ class PokemonList extends React.Component {
             this.setState({ monNum: data.pokemon_species.length });
             const mon0 = data.pokemon_species[0].url;
             let startNum = mon0.substring(mon0.lastIndexOf("species") + 8, mon0.lastIndexOf("/")) - 1;
+            this.counter = startNum;
             this.setState({ listLink2: `https://pokeapi.co/api/v2/pokemon?limit=${this.state.monNum}&offset=${startNum}` });
             this.getList2();
         })
@@ -79,18 +82,9 @@ class PokemonList extends React.Component {
         .catch(error => console.log(error.message));
     }
 
-    getSprite = (namae) => {
-        fetch(`https://pokeapi.co/api/v2/pokemon/${namae}`)
-        .then(checkStatus)
-        .then(json)
-        .then(data => {
-            if(data.error) {
-                throw new Error(data.error);
-            }
-            console.log(data.sprites["front_default"]);
-            return data.sprites["front_default"];
-        })
-        .catch(error => console.log(error.message));
+    getSprite = () => {
+        this.counter++;
+        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + this.counter +".png"
     }
 
     topFunction = () => {
@@ -99,13 +93,12 @@ class PokemonList extends React.Component {
     }
 
     render() {
-        const{ region, monName, mons } = this.state;
-
+        const{ region, monName, mons, monNum } = this.state;
         return(
             <React.Fragment>
                 <h1>{region}</h1>
                 <div className="list-group">
-                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}>{mon.name}</button>
+                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}><img src={this.getSprite()}></img>{mon.name}</button>
                     )}
                 </div>
                 <button onClick={this.topFunction}>Top</button>
