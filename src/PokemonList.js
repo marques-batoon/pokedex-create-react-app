@@ -17,8 +17,8 @@ class PokemonList extends React.Component {
             region: params.get('region') || 'kanto',
             monName: '',
             listLink: '',
-            listLink2: '',
             monNum: 0,
+            lastNum: 0,
         }
     }
 
@@ -45,14 +45,13 @@ class PokemonList extends React.Component {
             if(data.error) {
                 throw new Error(data.error);
             }
-            this.setState({ listLink: data.main_generation.url });
-            this.getList();
+            this.getList(data.main_generation.url);
         })
         .catch(error => console.log(error.message));
     }
 
-    getList = () => {
-        fetch(this.state.listLink)
+    getList = (listLink) => {
+        fetch(listLink)
         .then(checkStatus)
         .then(json)
         .then(data => {
@@ -63,14 +62,15 @@ class PokemonList extends React.Component {
             const mon0 = data.pokemon_species[0].url;
             let startNum = mon0.substring(mon0.lastIndexOf("species") + 8, mon0.lastIndexOf("/")) - 1;
             this.counter = startNum;
-            this.setState({ listLink2: `https://pokeapi.co/api/v2/pokemon?limit=${this.state.monNum}&offset=${startNum}` });
-            this.getList2();
+            this.setState({ lastNum: startNum + data.pokemon_species.length + 1 });
+            console.log(startNum + data.pokemon_species.length);
+            this.getList2(`https://pokeapi.co/api/v2/pokemon?limit=${this.state.monNum}&offset=${startNum}`);
         })
         .catch(error => console.log(error.message));
     }
 
-    getList2 = () => {
-        fetch(this.state.listLink2)
+    getList2 = (listLink2) => {
+        fetch(listLink2)
         .then(checkStatus)
         .then(json)
         .then(data => {
@@ -83,8 +83,13 @@ class PokemonList extends React.Component {
     }
 
     getSprite = () => {
+        if(this.counter == this.state.lastNum) {
+            //this.counter = this.counter - this.state.mons.length;
+            //above code prints first mon to first mon of next gen
+            return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png";
+        }
         this.counter++;
-        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + this.counter +".png"
+        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + this.counter +".png";
     }
 
     topFunction = () => {
@@ -98,7 +103,7 @@ class PokemonList extends React.Component {
             <React.Fragment>
                 <h1>{region}</h1>
                 <div className="list-group">
-                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}><img className="sprite" src={this.getSprite()} value={mon.name} onClick={this.clickedMon}></img>{mon.name}</button>
+                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}><img className="sprite" src={this.getSprite()}></img>{mon.name}</button>
                     )}
                 </div>
                 <button onClick={this.topFunction}>Top</button>
