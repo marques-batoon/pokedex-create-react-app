@@ -16,6 +16,7 @@ class Pokemon extends React.Component {
             nextMon: '',
             prevMon: '',
             disabled: true,
+            nextDisabled: true,
         }
         this.chartRef = React.createRef();
     }
@@ -45,9 +46,6 @@ class Pokemon extends React.Component {
             this.toNext(1 + parseInt(pokeNum));
             this.toPrev(parseInt(pokeNum) - 1);
 
-            // next and prev button
-            this.setState({ disabled: false });
-
         })
         .catch(error => console.log(error.message));
     }
@@ -58,9 +56,9 @@ class Pokemon extends React.Component {
         .then(json)
         .then(data => {
             if(data.error) {
-                this.setState({ nextMon: this.state.name });
                 throw new Error(data.error);
             }
+            this.setState({ nextDisabled: false });
             this.setState({ nextMon: data.name });
         })
         .catch(error => console.log(error.message));
@@ -77,6 +75,7 @@ class Pokemon extends React.Component {
             if(data.error) {
                 throw new Error(data.error);
             }
+            this.setState({ disabled: false });
             this.setState({ prevMon: data.name });
         })
         .catch(error => console.log(error.message));
@@ -130,14 +129,14 @@ class Pokemon extends React.Component {
     }
 
     render() {
-        const{ name, imgLink, disabled } = this.state;
+        const{ name, imgLink, disabled, nextDisabled } = this.state;
 
         return(
             <React.Fragment>
                 <div className="container">
                     <div className="row justify-content-between">
                         <button onClick={this.prevPokemon} disabled={disabled}>Prev</button>
-                        <button onClick={this.nextPokemon} disabled={disabled}>Next</button>
+                        <button onClick={this.nextPokemon} disabled={nextDisabled}>Next</button>
                     </div>
                 </div>
                 <h1>{name}</h1>
