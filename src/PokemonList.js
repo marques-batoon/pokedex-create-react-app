@@ -98,7 +98,7 @@ class PokemonList extends React.Component {
             <React.Fragment>
                 <h1>{region}</h1>
                 <div className="list-group">
-                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}><img src={this.getSprite()} value={mon.name} onClick={this.clickedMon}></img>{mon.name}</button>
+                    {mons.map(mon => <button type="button" className="list-group-item list-group-item-action text-center" key={mon.name} value={mon.name} onClick={this.clickedMon}><img className="sprite" src={this.getSprite()} value={mon.name} onClick={this.clickedMon}></img>{mon.name}</button>
                     )}
                 </div>
                 <button onClick={this.topFunction}>Top</button>

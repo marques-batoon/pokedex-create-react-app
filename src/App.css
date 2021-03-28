@@ -11,3 +11,7 @@ footer a {
     width: 100%;
   }
 }
+
+.sprite {
+  pointer-events: none;
+}
