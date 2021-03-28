@@ -15,6 +15,7 @@ class Pokemon extends React.Component {
             imgLink: '',
             nextMon: '',
             prevMon: '',
+            disabled: true,
         }
         this.chartRef = React.createRef();
     }
@@ -43,6 +44,10 @@ class Pokemon extends React.Component {
             this.setState({ pokeNum });
             this.toNext(1 + parseInt(pokeNum));
             this.toPrev(parseInt(pokeNum) - 1);
+
+            // next and prev button
+            this.setState({ disabled: false });
+
         })
         .catch(error => console.log(error.message));
     }
@@ -53,6 +58,7 @@ class Pokemon extends React.Component {
         .then(json)
         .then(data => {
             if(data.error) {
+                this.setState({ nextMon: this.state.name });
                 throw new Error(data.error);
             }
             this.setState({ nextMon: data.name });
@@ -61,6 +67,9 @@ class Pokemon extends React.Component {
     }
 
     toPrev = (num) => {
+        if(num===0){
+            num = 1;
+        }
         fetch(`https://pokeapi.co/api/v2/pokemon/${num}`)
         .then(checkStatus)
         .then(json)
@@ -121,21 +130,21 @@ class Pokemon extends React.Component {
     }
 
     render() {
-        const{ name, imgLink, nextMon } = this.state;
+        const{ name, imgLink, disabled } = this.state;
 
         return(
             <React.Fragment>
                 <div className="container">
                     <div className="row justify-content-between">
-                        <button onClick={this.prevPokemon}>Prev</button>
-                        <button onClick={this.nextPokemon}>Next</button>
+                        <button onClick={this.prevPokemon} disabled={disabled}>Prev</button>
+                        <button onClick={this.nextPokemon} disabled={disabled}>Next</button>
                     </div>
                 </div>
                 <h1>{name}</h1>
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-12 row justify-content-center">
-                            <img className="w=100" src={imgLink} alt={name}></img>
+                            <img className="mon100" src={imgLink} alt={name}></img>
                         </div>
                         <div className="col-12 col-lg-6">
                             <canvas ref={this.chartRef} />
