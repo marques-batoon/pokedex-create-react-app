@@ -27,7 +27,7 @@ const Layout = (props) => {
                             <a href="https://twitter.com/batoonworld" rel="noreferrer" target="_blank" className="mx-1">
                             <FontAwesomeIcon icon={['fab', 'twitter']} />
                             </a>
-                            <a href="https://www.github.com/MBatoon1996" rel="noreferrer" target="_blank" className="mx-1">
+                            <a href="https://www.github.com/marques-batoon" rel="noreferrer" target="_blank" className="mx-1">
                             <FontAwesomeIcon icon={['fab', 'github']} />
                             </a>
                         </div>
