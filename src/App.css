@@ -331,6 +331,28 @@
 .btn-nav--prev:hover:not(:disabled) { transform: translateX(-3px); }
 .btn-nav--next:hover:not(:disabled) { transform: translateX(3px);  }
 
+.pokemon-detail__names {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.pokemon-detail__name {
+  margin-bottom: 0 !important;
+}
+
+.pokemon-detail__ja-name {
+  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', 'Yu Gothic', sans-serif;
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  opacity: 0;
+  animation: fadeIn 0.5s ease 0.3s forwards;
+}
+
 .pokemon-detail__name {
   font-family: 'Orbitron', sans-serif;
   font-weight: 900;
@@ -340,7 +362,6 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1.5rem;
 }
 
 .pokemon-detail__image-wrap {

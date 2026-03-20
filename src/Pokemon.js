@@ -160,6 +160,7 @@ class Pokemon extends React.Component {
       nextDisabled: true,
       stats:        null,
       baseExp:      null,
+      jaName:       '',
     };
   }
 
@@ -191,6 +192,19 @@ class Pokemon extends React.Component {
         this.setState({ pokeNum });
         this.toNext(1 + parseInt(pokeNum));
         this.toPrev(parseInt(pokeNum) - 1);
+        this.getJaName(mon0);
+      })
+      .catch((error) => console.log(error.message));
+  };
+
+  getJaName = (speciesUrl) => {
+    fetch(speciesUrl)
+      .then(checkStatus)
+      .then(json)
+      .then((data) => {
+        if (data.error) throw new Error(data.error);
+        const jaEntry = data.names.find((n) => n.language.name === 'ja');
+        if (jaEntry) this.setState({ jaName: jaEntry.name });
       })
       .catch((error) => console.log(error.message));
   };
@@ -231,7 +245,7 @@ class Pokemon extends React.Component {
   };
 
   render() {
-    const { name, imgLink, disabled, nextDisabled, stats, baseExp } = this.state;
+    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName } = this.state;
 
     return (
       <div className="pokemon-detail">
@@ -244,7 +258,10 @@ class Pokemon extends React.Component {
           </button>
         </div>
 
-        <h1 className="pokemon-detail__name">{name}</h1>
+        <div className="pokemon-detail__names">
+          <h1 className="pokemon-detail__name">{name}</h1>
+          {jaName && <span className="pokemon-detail__ja-name">{jaName}</span>}
+        </div>
 
         <div className="container">
           <div className="row justify-content-center">
