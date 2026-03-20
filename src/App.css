@@ -1409,8 +1409,8 @@
 }
 
 .challenge-card__stat-reveal--winner {
-  background: rgba(120,200,80,0.15);
-  border: 1px solid rgba(120,200,80,0.4);
+  background: rgba(13,13,20,0.88);
+  border: 1px solid rgba(255,203,5,0.35);
 }
 
 .challenge-card__stat-label {
@@ -1429,7 +1429,7 @@
 }
 
 .challenge-card__stat-reveal--winner .challenge-card__stat-val {
-  color: #78c850;
+  color: var(--yellow);
 }
 
 /* Win/Lose badge */
