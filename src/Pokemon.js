@@ -159,6 +159,7 @@ class Pokemon extends React.Component {
       disabled:     true,
       nextDisabled: true,
       stats:        null,
+      baseExp:      null,
     };
   }
 
@@ -180,8 +181,9 @@ class Pokemon extends React.Component {
         });
 
         this.setState({
-          imgLink: data.sprites.other['official-artwork']['front_default'],
+          imgLink:  data.sprites.other['official-artwork']['front_default'],
           stats,
+          baseExp:  data.base_experience,
         });
 
         const mon0    = data.species.url;
@@ -229,7 +231,7 @@ class Pokemon extends React.Component {
   };
 
   render() {
-    const { name, imgLink, disabled, nextDisabled, stats } = this.state;
+    const { name, imgLink, disabled, nextDisabled, stats, baseExp } = this.state;
 
     return (
       <div className="pokemon-detail">
@@ -247,7 +249,19 @@ class Pokemon extends React.Component {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-12 col-md-5 pokemon-detail__image-wrap">
-              {imgLink && <img className="mon100" src={imgLink} alt={name} />}
+              {imgLink && (
+                <img
+                  className="mon100"
+                  src={imgLink}
+                  alt={name}
+                  style={baseExp != null ? (() => {
+                    const MIN_EXP = 36, MAX_EXP = 340, MIN_PX = 110, MAX_PX = 290;
+                    const clamped = Math.max(MIN_EXP, Math.min(MAX_EXP, baseExp));
+                    const size = Math.round(MIN_PX + (clamped - MIN_EXP) / (MAX_EXP - MIN_EXP) * (MAX_PX - MIN_PX));
+                    return { width: size, height: size };
+                  })() : {}}
+                />
+              )}
             </div>
             <div className="col-12 col-md-7">
               <StatPanel stats={stats} />
