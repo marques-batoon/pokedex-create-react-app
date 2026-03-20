@@ -499,6 +499,130 @@
   margin: 0 1px;
 }
 
+
+
+/* ===========================
+   NAV SEARCH
+   =========================== */
+.nav-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.35rem 0.75rem;
+  transition: all 0.25s;
+  width: 220px;
+}
+
+.nav-search--focused {
+  border-color: var(--red);
+  background: rgba(227, 53, 13, 0.06);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+.nav-search__icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.nav-search__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.nav-search--focused .nav-search__icon {
+  color: var(--red);
+}
+
+.nav-search__input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  width: 100%;
+  caret-color: var(--red);
+}
+
+.nav-search__input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  .nav-search {
+    width: 130px;
+  }
+}
+
+/* ===========================
+   REGIONAL FORM PILLS
+   =========================== */
+.pokemon-forms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pokemon-form-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 99px;
+  border: 1px solid var(--red);
+  color: var(--red);
+  background: rgba(227, 53, 13, 0.08);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.pokemon-form-pill::before {
+  content: '◆';
+  font-size: 0.5rem;
+  opacity: 0.7;
+}
+
+.pokemon-form-pill:hover {
+  background: var(--red);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 4px 16px var(--red-glow);
+  transform: translateY(-2px);
+}
+
+.pokemon-form-pill:active {
+  transform: translateY(0);
+}
+
+.pokemon-form-pill--active {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+  cursor: default;
+  box-shadow: 0 4px 16px var(--red-glow);
+}
+
+.pokemon-form-pill--active::before {
+  content: '◆';
+  font-size: 0.5rem;
+  opacity: 0.85;
+}
+
 /* ===========================
    FOOTER
    =========================== */
@@ -571,7 +695,7 @@
    RESPONSIVE
    =========================== */
 @media (max-width: 600px) {
-  .mon100 { max-width: 70vw; max-height: 70vw; }
+  .mon100 { max-width: 80vw; max-height: 80vw; }
   .poke-navbar { padding: 0 1rem; }
   .poke-navbar__brand span { display: none; }
   .mon-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
