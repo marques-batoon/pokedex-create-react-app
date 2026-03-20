@@ -1,29 +1,51 @@
 import React from 'react';
 import { checkStatus, json } from './utils/fetchUtils';
 
-// Extract national dex ID from a PokeAPI species URL
-// e.g. "https://pokeapi.co/api/v2/pokemon-species/906/" -> 906
 const extractId = (url) => parseInt(url.split('/').filter(Boolean).pop(), 10);
 
-// Regions where main_generation is shared with another region (Hisui shares gen-viii
-// with Galar), so we must use the named regional pokedex instead.
-const FORCE_REGIONAL_POKEDEX = ['hisui'];
+// Hisui has no main_generation of its own so must use the regional pokédex.
+// All other regions use getFromGeneration (new species only).
+const FORCE_REGIONAL_POKEDEX = new Set(['hisui']);
 
-// Max legitimate national dex ID. Form-variant entries stored as species have IDs
-// in the 10000+ range and don't correspond to real sprites — filter them out.
+// For regions with regional forms, these are the BASE species names that have
+// a regional variant. We fetch only these specific form names — NOT the full
+// regional dex. Promise.allSettled means a missing form quietly drops out.
+const REGIONAL_FORM_BASES = {
+  alola: [
+    'rattata-alola', 'raticate-alola', 'raichu-alola', 'sandshrew-alola', 'sandslash-alola',
+    'vulpix-alola', 'ninetales-alola', 'diglett-alola', 'dugtrio-alola', 'meowth-alola', 'persian-alola',
+    'geodude-alola', 'graveler-alola', 'golem-alola', 'grimer-alola', 'muk-alola',
+    'exeggutor-alola', 'marowak-alola',
+  ],
+  galar: [
+    'meowth-galar', 'ponyta-galar', 'rapidash-galar', 'slowpoke-galar', 'slowbro-galar', 'slowking-galar',
+    'farfetchd-galar', 'weezing-galar', 'mr-mime-galar', 'corsola-galar', 'zigzagoon-galar', 'linoone-galar',
+    'darumaka-galar', 'darmanitan-galar-standard', 'yamask-galar', 'stunfisk-galar',
+    'articuno-galar', 'zapdos-galar', 'moltres-galar',
+  ],
+  paldea: [
+    'wooper-paldea',
+    'tauros-paldea-combat-breed',
+    'tauros-paldea-blaze-breed',
+    'tauros-paldea-aqua-breed',
+  ],
+};
+
+// Pass ?region= hint when navigating to these regions so Pokemon.js can
+// auto-resolve base-species clicks to the correct regional form.
+const REGIONAL_FORM_REGIONS = new Set(['alola', 'galar', 'hisui', 'paldea']);
+
 const MAX_SPECIES_ID = 10000;
 
 class PokemonList extends React.Component {
   constructor(props) {
     super(props);
-
     const params = new URLSearchParams(props.location.search);
-
     this.state = {
-      mons: [],
-      region: params.get('region') || 'kanto',
+      mons:    [],
+      region:  params.get('region') || 'kanto',
       loading: true,
-      error: false,
+      error:   false,
     };
   }
 
@@ -32,38 +54,37 @@ class PokemonList extends React.Component {
   }
 
   clickedMon = (name) => {
+    const { region } = this.state;
+    // If the name already has the regional suffix baked in (e.g. 'vulpix-alola'),
+    // navigate directly — no region hint needed and avoids double-suffix bugs.
+    const alreadyForm = REGIONAL_FORM_REGIONS.has(region) && name.includes(`-${region}`);
+    const regionParam = (!alreadyForm && REGIONAL_FORM_REGIONS.has(region)) ? `&region=${region}` : '';
     setTimeout(() => {
-      window.location.href = `/pokemon?name=${name}`;
+      window.location.href = `/pokemon?name=${name}${regionParam}`;
     }, 120);
   };
 
   getPokemonList = () => {
     const { region } = this.state;
-
     fetch(`https://pokeapi.co/api/v2/region/${region}`)
       .then(checkStatus)
       .then(json)
       .then((data) => {
         if (data.error) throw new Error(data.error);
 
-        const forcePokedex = FORCE_REGIONAL_POKEDEX.includes(region);
-
-        if (!forcePokedex && data.main_generation) {
-          // Standard path: pull species from the generation endpoint.
-          this.getFromGeneration(data.main_generation.url);
-        } else {
-          // Fallback: use the regional pokedex.
-          // Prefer a pokedex whose name matches the region (most specific),
-          // then fall back to the first one in the list.
+        if (FORCE_REGIONAL_POKEDEX.has(region)) {
+          // Hisui: use the named regional pokédex (only path that works)
           const pokedexes = data.pokedexes || [];
-          const regional =
-            pokedexes.find((p) => p.name === region) || pokedexes[0];
-
+          const regional = pokedexes.find((p) => p.name === region) || pokedexes[0];
           if (regional) {
             this.getFromPokedex(regional.url);
           } else {
             this.setState({ loading: false });
           }
+        } else {
+          // All other regions: new species from the generation endpoint
+          // + any hardcoded regional forms for this region
+          this.getFromGeneration(data.main_generation.url);
         }
       })
       .catch((err) => {
@@ -72,22 +93,39 @@ class PokemonList extends React.Component {
       });
   };
 
-  // Pulls the generation's full species list, extracts IDs from URLs,
-  // sorts by national dex number, and filters out form-variant entries (ID > 10000).
-  // This correctly handles Paldea whose species aren't always returned in order.
+  // Fetches new species introduced in this generation, then appends any
+  // regional forms defined in REGIONAL_FORM_BASES for this region.
   getFromGeneration = (url) => {
+    const { region } = this.state;
+
     fetch(url)
       .then(checkStatus)
       .then(json)
-      .then((data) => {
+      .then(async (data) => {
         if (data.error) throw new Error(data.error);
 
-        const mons = data.pokemon_species
+        const genMons = data.pokemon_species
           .map((s) => ({ name: s.name, id: extractId(s.url) }))
           .filter((m) => m.id <= MAX_SPECIES_ID)
           .sort((a, b) => a.id - b.id);
 
-        this.setState({ mons, loading: false });
+        // Fetch regional forms in parallel — failures silently drop out
+        const formBases = REGIONAL_FORM_BASES[region] || [];
+        const formResults = await Promise.allSettled(
+          formBases.map((formName) =>
+            fetch(`https://pokeapi.co/api/v2/pokemon/${formName}`)
+              .then(checkStatus)
+              .then(json)
+              .then((d) => ({ name: d.name, id: d.id, sprite: d.sprites.front_default }))
+          )
+        );
+
+        const regionalForms = formResults
+          .filter((r) => r.status === 'fulfilled')
+          .map((r) => r.value);
+
+        // Merge: gen species first, then regional forms appended at the end
+        this.setState({ mons: [...genMons, ...regionalForms], loading: false });
       })
       .catch((err) => {
         console.log(err.message);
@@ -95,23 +133,20 @@ class PokemonList extends React.Component {
       });
   };
 
-  // Pulls from a regional pokedex endpoint (pokemon_entries in regional dex order).
-  // Used for Hisui and any region without a usable main_generation.
+  // Used only for Hisui — pulls from the regional pokédex endpoint.
   getFromPokedex = (url) => {
     fetch(url)
       .then(checkStatus)
       .then(json)
       .then((data) => {
         if (data.error) throw new Error(data.error);
-
         const mons = [...(data.pokemon_entries || [])]
           .sort((a, b) => a.entry_number - b.entry_number)
           .map((entry) => ({
             name: entry.pokemon_species.name,
-            id: extractId(entry.pokemon_species.url),
+            id:   extractId(entry.pokemon_species.url),
           }))
           .filter((m) => m.id <= MAX_SPECIES_ID);
-
         this.setState({ mons, loading: false });
       })
       .catch((err) => {
@@ -127,7 +162,6 @@ class PokemonList extends React.Component {
 
   render() {
     const { region, mons, loading, error } = this.state;
-
     return (
       <React.Fragment>
         <h1 className="page-title">{region}</h1>
@@ -156,7 +190,7 @@ class PokemonList extends React.Component {
               >
                 <img
                   className="mon-card__sprite"
-                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${mon.id}.png`}
+                  src={mon.sprite || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${mon.id}.png`}
                   alt={mon.name}
                 />
                 <span className="mon-card__name">{mon.name}</span>

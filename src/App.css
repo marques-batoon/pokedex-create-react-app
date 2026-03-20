@@ -547,6 +547,20 @@
   transform: translateY(0);
 }
 
+.pokemon-form-pill--active {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+  cursor: default;
+  box-shadow: 0 4px 16px var(--red-glow);
+}
+
+.pokemon-form-pill--active::before {
+  content: '◆';
+  font-size: 0.5rem;
+  opacity: 0.85;
+}
+
 /* ===========================
    FOOTER
    =========================== */

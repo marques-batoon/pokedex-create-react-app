@@ -1,21 +1,19 @@
 import React from 'react';
 import { checkStatus, json } from './utils/fetchUtils';
 
-
 // ─── Form name formatter ──────────────────────────────────────────────────────
-// Turns "vulpix-alola" → "Alolan Form", "dialga-origin" → "Origin Forme", etc.
 const REGIONAL = { alola: 'Alolan', galar: 'Galarian', hisui: 'Hisuian', paldea: 'Paldean' };
 
-function formatFormName(fullName) {
+function formatFormName(fullName, baseName) {
+  // If this IS the base name, always label it "Base Form"
+  if (fullName === baseName) return 'Base Form';
+
   const parts = fullName.split('-');
-  // Drop the base species name (first part) and join the rest
   const suffix = parts.slice(1).join('-');
   if (!suffix) return fullName;
 
-  // Regional variants get "X Form"
   if (REGIONAL[suffix]) return `${REGIONAL[suffix]} Form`;
 
-  // Everything else: title-case each word + "Forme"
   const titled = suffix
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -23,35 +21,20 @@ function formatFormName(fullName) {
   return `${titled} Forme`;
 }
 
-// ─── Stat calculation (standard competitive formulas) ────────────────────────
-// HP:    floor((2*Base + IV + floor(EV/4)) * Lv/100) + Lv + 10
-// Other: floor((floor((2*Base + IV + floor(EV/4)) * Lv/100) + 5) * Nature)
-//
-// Min = 0 IV, 0 EV, hindering nature (×0.9, not applied to HP)
-// Max = 31 IV, 252 EV → floor(252/4)=63, beneficial nature (×1.1, not for HP)
-
+// ─── Stat calculation ─────────────────────────────────────────────────────────
 function calcHP(base, level, iv, ev) {
   return Math.floor((2 * base + iv + Math.floor(ev / 4)) * level / 100) + level + 10;
 }
-
 function calcStat(base, level, iv, ev, nature) {
   return Math.floor((Math.floor((2 * base + iv + Math.floor(ev / 4)) * level / 100) + 5) * nature);
 }
-
 function getMinMax(base, isHP, level) {
   if (isHP) {
-    return {
-      min: calcHP(base, level, 0, 0),
-      max: calcHP(base, level, 31, 252),
-    };
+    return { min: calcHP(base, level, 0, 0), max: calcHP(base, level, 31, 252) };
   }
-  return {
-    min: calcStat(base, level, 0, 0, 0.9),
-    max: calcStat(base, level, 31, 252, 1.1),
-  };
+  return { min: calcStat(base, level, 0, 0, 0.9), max: calcStat(base, level, 31, 252, 1.1) };
 }
 
-// ─── Stat config ──────────────────────────────────────────────────────────────
 const STATS = [
   { key: 'hp',              label: 'HP',     color: '#ff5959', isHP: true  },
   { key: 'attack',          label: 'Atk',    color: '#f08030', isHP: false },
@@ -61,33 +44,23 @@ const STATS = [
   { key: 'speed',           label: 'Speed',  color: '#f85888', isHP: false },
 ];
 
-// Max possible stat value (for bar scaling). Highest base stat is 255 (Blissey HP).
-// At lv100, max HP ≈ 714 and max other ≈ 800+ with nature/EVs — use 714 / 800 as bar ceiling.
-const BAR_MAX = 255; // base stat bar is scaled against 255
+const BAR_MAX = 255;
 
-// ─── StatPanel component ──────────────────────────────────────────────────────
+// ─── StatPanel ────────────────────────────────────────────────────────────────
 class StatPanel extends React.Component {
   constructor(props) {
     super(props);
     this.state = { animated: false };
-    this.rowRefs = STATS.map(() => React.createRef());
   }
 
   componentDidMount() {
-    // Tiny delay lets the browser paint at width:0 first so the transition fires
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.setState({ animated: true });
-      });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ animated: true })));
   }
 
   componentDidUpdate(prev) {
     if (prev.stats !== this.props.stats) {
       this.setState({ animated: false }, () => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => this.setState({ animated: true }));
-        });
+        requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ animated: true })));
       });
     }
   }
@@ -95,12 +68,10 @@ class StatPanel extends React.Component {
   render() {
     const { stats } = this.props;
     const { animated } = this.state;
-
     if (!stats) return null;
 
     return (
       <div className="stat-panel">
-        {/* Column headers */}
         <div className="stat-panel__header">
           <span className="stat-panel__header-label">Stat</span>
           <span className="stat-panel__header-label stat-panel__header-label--right">Base</span>
@@ -117,15 +88,8 @@ class StatPanel extends React.Component {
 
           return (
             <div className="stat-row" key={cfg.key}>
-              {/* Name */}
-              <span className="stat-row__name" style={{ color: cfg.color }}>
-                {cfg.label}
-              </span>
-
-              {/* Base value */}
+              <span className="stat-row__name" style={{ color: cfg.color }}>{cfg.label}</span>
               <span className="stat-row__base">{base}</span>
-
-              {/* Bar */}
               <div className="stat-row__bar-wrap">
                 <div
                   className="stat-row__bar"
@@ -137,24 +101,16 @@ class StatPanel extends React.Component {
                   }}
                 />
               </div>
-
-              {/* Lv. 50 min–max */}
               <div className="stat-row__lv">
                 <span className="stat-row__lv-title">min–max</span>
                 <span className="stat-row__lv-range">
-                  {lv50.min}
-                  <span className="stat-row__lv-sep">–</span>
-                  {lv50.max}
+                  {lv50.min}<span className="stat-row__lv-sep">–</span>{lv50.max}
                 </span>
               </div>
-
-              {/* Lv. 100 min–max */}
               <div className="stat-row__lv">
                 <span className="stat-row__lv-title">min–max</span>
                 <span className="stat-row__lv-range">
-                  {lv100.min}
-                  <span className="stat-row__lv-sep">–</span>
-                  {lv100.max}
+                  {lv100.min}<span className="stat-row__lv-sep">–</span>{lv100.max}
                 </span>
               </div>
             </div>
@@ -169,11 +125,10 @@ class StatPanel extends React.Component {
 class Pokemon extends React.Component {
   constructor(props) {
     super(props);
-
     const params = new URLSearchParams(props.location.search);
-
     this.state = {
       name:         params.get('name') || 'MissingNo.',
+      region:       params.get('region') || '',  // hint for regional form lookup
       pokeNum:      '',
       imgLink:      '',
       nextMon:      '',
@@ -183,7 +138,10 @@ class Pokemon extends React.Component {
       stats:        null,
       baseExp:      null,
       jaName:       '',
-      forms:        [],
+      // All varieties from the species endpoint: [{ name, isDefault }]
+      allVarieties: [],
+      // The base (default) species name — used for "Base Form" label
+      baseName:     '',
     };
   }
 
@@ -192,35 +150,48 @@ class Pokemon extends React.Component {
   }
 
   getMon = () => {
-    fetch(`https://pokeapi.co/api/v2/pokemon/${this.state.name}`)
+    const { name, region } = this.state;
+    // If a region hint is provided, try the regional form first (e.g. "vulpix-alola"),
+    // then silently fall back to the base name if it doesn't exist.
+    const tryFirst = region ? `${name}-${region}` : name;
+
+    fetch(`https://pokeapi.co/api/v2/pokemon/${tryFirst}`)
       .then(checkStatus)
       .then(json)
-      .then((data) => {
-        if (data.error) throw new Error(data.error);
-
-        // Build stats map keyed by stat name
-        const stats = {};
-        data.stats.forEach((s) => {
-          stats[s.stat.name] = s.base_stat;
-        });
-
-        this.setState({
-          imgLink:  data.sprites.other['official-artwork']['front_default'],
-          stats,
-          baseExp:  data.base_experience,
-        });
-
-        const mon0    = data.species.url;
-        const pokeNum = mon0.substring(mon0.lastIndexOf('species') + 8, mon0.lastIndexOf('/'));
-        this.setState({ pokeNum });
-        this.toNext(1 + parseInt(pokeNum));
-        this.toPrev(parseInt(pokeNum) - 1);
-        this.getJaName(mon0);
-      })
-      .catch((error) => console.log(error.message));
+      .then((data) => this.handleMonData(data))
+      .catch(() => {
+        // Regional form didn't exist — fall back to the base name
+        if (tryFirst !== name) {
+          fetch(`https://pokeapi.co/api/v2/pokemon/${name}`)
+            .then(checkStatus)
+            .then(json)
+            .then((data) => this.handleMonData(data))
+            .catch((err) => console.log(err.message));
+        }
+      });
   };
 
-  getJaName = (speciesUrl) => {
+  handleMonData = (data) => {
+    const stats = {};
+    data.stats.forEach((s) => { stats[s.stat.name] = s.base_stat; });
+
+    // Update the displayed name to the actual loaded form (may differ from URL param)
+    this.setState({
+      name:    data.name,
+      imgLink: data.sprites.other['official-artwork']['front_default'],
+      stats,
+      baseExp: data.base_experience,
+    });
+
+    const mon0    = data.species.url;
+    const pokeNum = mon0.substring(mon0.lastIndexOf('species') + 8, mon0.lastIndexOf('/'));
+    this.setState({ pokeNum });
+    this.toNext(1 + parseInt(pokeNum));
+    this.toPrev(parseInt(pokeNum) - 1);
+    this.getSpeciesData(mon0);
+  };
+
+  getSpeciesData = (speciesUrl) => {
     fetch(speciesUrl)
       .then(checkStatus)
       .then(json)
@@ -231,13 +202,19 @@ class Pokemon extends React.Component {
         const jaEntry = data.names.find((n) => n.language.name === 'ja');
         if (jaEntry) this.setState({ jaName: jaEntry.name });
 
-        // Non-default varieties = regional / alternate forms
-        const forms = (data.varieties || [])
-          .filter((v) => !v.is_default)
-          .map((v) => v.pokemon.name);
-        this.setState({ forms });
+        // ALL varieties (default + non-default) for the form toggle
+        const allVarieties = (data.varieties || []).map((v) => ({
+          name:      v.pokemon.name,
+          isDefault: v.is_default,
+        }));
+
+        // The default variety name = the base species name
+        const defaultVariety = allVarieties.find((v) => v.isDefault);
+        const baseName = defaultVariety ? defaultVariety.name : this.state.name;
+
+        this.setState({ allVarieties, baseName });
       })
-      .catch((error) => console.log(error.message));
+      .catch((err) => console.log(err.message));
   };
 
   toNext = (num) => {
@@ -248,7 +225,7 @@ class Pokemon extends React.Component {
         if (data.error) throw new Error(data.error);
         this.setState({ nextDisabled: false, nextMon: data.name });
       })
-      .catch((error) => console.log(error.message));
+      .catch((err) => console.log(err.message));
   };
 
   toPrev = (num) => {
@@ -260,23 +237,22 @@ class Pokemon extends React.Component {
         if (data.error) throw new Error(data.error);
         this.setState({ disabled: false, prevMon: data.name });
       })
-      .catch((error) => console.log(error.message));
+      .catch((err) => console.log(err.message));
   };
 
   nextPokemon = () => {
-    setTimeout(() => {
-      window.location.href = `/pokemon?name=${this.state.nextMon}`;
-    }, 120);
+    setTimeout(() => { window.location.href = `/pokemon?name=${this.state.nextMon}`; }, 120);
   };
 
   prevPokemon = () => {
-    setTimeout(() => {
-      window.location.href = `/pokemon?name=${this.state.prevMon}`;
-    }, 120);
+    setTimeout(() => { window.location.href = `/pokemon?name=${this.state.prevMon}`; }, 120);
   };
 
   render() {
-    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName, forms } = this.state;
+    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName, allVarieties, baseName } = this.state;
+
+    // Only show form pills when there are 2+ varieties
+    const showForms = allVarieties.length > 1;
 
     return (
       <div className="pokemon-detail">
@@ -294,17 +270,21 @@ class Pokemon extends React.Component {
           {jaName && <span className="pokemon-detail__ja-name">{jaName}</span>}
         </div>
 
-        {forms.length > 0 && (
+        {showForms && (
           <div className="pokemon-forms">
-            {forms.map((formName) => (
-              <a
-                key={formName}
-                href={`/pokemon?name=${formName}`}
-                className="pokemon-form-pill"
-              >
-                {formatFormName(formName)}
-              </a>
-            ))}
+            {allVarieties.map((v) => {
+              const isActive = v.name === name;
+              const label = formatFormName(v.name, baseName);
+              return isActive ? (
+                <span key={v.name} className="pokemon-form-pill pokemon-form-pill--active">
+                  {label}
+                </span>
+              ) : (
+                <a key={v.name} href={`/pokemon?name=${v.name}`} className="pokemon-form-pill">
+                  {label}
+                </a>
+              );
+            })}
           </div>
         )}
 
