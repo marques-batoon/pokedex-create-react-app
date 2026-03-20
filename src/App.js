@@ -6,6 +6,7 @@ import PokemonList from './PokemonList';
 
 import './App.css';
 import Pokemon from './Pokemon';
+import Compare from './Compare';
 
 const App = () => {
   return(
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/" exact component={Home} />
           <Route path="/pokemonlist" component={PokemonList} />
           <Route path="/pokemon" component={Pokemon} />
+          <Route path="/compare" component={Compare} />
           <Route render={() => <h1>404 Not Found</h1>} />
         </Switch>
       </Layout>
