@@ -7,6 +7,7 @@ import PokemonList from './PokemonList';
 import './App.css';
 import Pokemon from './Pokemon';
 import Compare from './Compare';
+import Team from './Team';
 
 const App = () => {
   return(
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/pokemonlist" component={PokemonList} />
           <Route path="/pokemon" component={Pokemon} />
           <Route path="/compare" component={Compare} />
+          <Route path="/team" component={Team} />
           <Route render={() => <h1>404 Not Found</h1>} />
         </Switch>
       </Layout>
