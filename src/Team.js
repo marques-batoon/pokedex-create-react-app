@@ -112,6 +112,7 @@ class DraggableSprite extends React.Component {
       x: null, y: null,
       dragging: false,
       tapping: false,
+      revealed: false,  // true once entrance animation has finished
     };
     this._startMouseX = 0; this._startMouseY = 0;
     this._startX = 0;      this._startY = 0;
@@ -123,6 +124,15 @@ class DraggableSprite extends React.Component {
   componentWillUnmount() {
     this._removeListeners();
     clearTimeout(this._tapTimer);
+    clearTimeout(this._revealTimer);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Once the sprite becomes visible, mark revealed after the entrance animation finishes
+    if (!prevProps.visible && this.props.visible && !this.state.revealed) {
+      const delay = this.props.index * 80 + 550 + 100; // delay + duration + buffer
+      this._revealTimer = setTimeout(() => this.setState({ revealed: true }), delay);
+    }
   }
 
   onPointerDown = (e) => {
@@ -192,8 +202,7 @@ class DraggableSprite extends React.Component {
 
   render() {
     const { src, alt, index, visible } = this.props;
-    const { x, y, dragging, tapping } = this.state;
-
+    const { x, y, dragging, tapping, revealed } = this.state;
     const positioned = x !== null;
 
     // Outer wrapper: either CSS-positioned (during/after drag) or
@@ -220,12 +229,12 @@ class DraggableSprite extends React.Component {
           cursor: 'grab',
           pointerEvents: 'auto',
         };
-
     const imgClasses = [
       'victory-sprite-img',
-      visible  ? 'victory-sprite-img--visible'  : '',
-      dragging ? 'victory-sprite-img--dragging'  : '',
-      tapping  ? 'victory-sprite-img--tap'       : '',
+      visible && !revealed ? 'victory-sprite-img--visible' : '',
+      revealed             ? 'victory-sprite-img--done'    : '',
+      dragging             ? 'victory-sprite-img--dragging' : '',
+      tapping              ? 'victory-sprite-img--tap'      : '',
     ].filter(Boolean).join(' ');
 
     return (

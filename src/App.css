@@ -2014,6 +2014,12 @@
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Once entrance animation is done — stay visible, no more animation */
+.victory-sprite-img--done {
+  opacity: 1;
+  animation: none;
+}
+
 /* Dragging */
 .victory-sprite-img--dragging {
   filter: drop-shadow(0 12px 28px rgba(255,203,5,0.6));
