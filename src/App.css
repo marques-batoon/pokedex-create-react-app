@@ -633,7 +633,7 @@
    RESPONSIVE
    =========================== */
 @media (max-width: 600px) {
-  .mon100 { max-width: 70vw; max-height: 70vw; }
+  .mon100 { max-width: 80vw; max-height: 80vw; }
   .poke-navbar { padding: 0 1rem; }
   .poke-navbar__brand span { display: none; }
   .mon-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }

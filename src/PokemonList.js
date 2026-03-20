@@ -31,9 +31,35 @@ const REGIONAL_FORM_BASES = {
   ],
 };
 
+// Species that have a named Hisuian form. The value is the exact API pokemon name.
+// New Hisui-exclusive species (Wyrdeer, Kleavor, etc.) are NOT listed here — their
+// national dex ID sprite is correct. Only old species with a -hisui form are listed.
+const HISUI_FORMS = {
+  'growlithe':  'growlithe-hisui',
+  'arcanine':   'arcanine-hisui',
+  'voltorb':    'voltorb-hisui',
+  'electrode':  'electrode-hisui',
+  'typhlosion': 'typhlosion-hisui',
+  'qwilfish':   'qwilfish-hisui',
+  'samurott':   'samurott-hisui',
+  'lilligant':  'lilligant-hisui',
+  'zorua':      'zorua-hisui',
+  'zoroark':    'zoroark-hisui',
+  'braviary':   'braviary-hisui',
+  'sliggoo':    'sliggoo-hisui',
+  'goodra':     'goodra-hisui',
+  'avalugg':    'avalugg-hisui',
+  'decidueye':  'decidueye-hisui',
+  'dialga':     'dialga-origin',
+  'palkia':     'palkia-origin',
+  'giratina':   'giratina-origin',
+  'shaymin':    'shaymin-sky',
+};
+
 // Pass ?region= hint when navigating to these regions so Pokemon.js can
 // auto-resolve base-species clicks to the correct regional form.
-const REGIONAL_FORM_REGIONS = new Set(['alola', 'galar', 'hisui', 'paldea']);
+// hisui is excluded — form names are already baked into entries by getFromPokedex
+const REGIONAL_FORM_REGIONS = new Set(['alola', 'galar', 'paldea']);
 
 const MAX_SPECIES_ID = 10000;
 
@@ -133,20 +159,35 @@ class PokemonList extends React.Component {
       });
   };
 
-  // Used only for Hisui — pulls from the regional pokédex endpoint.
+  // Used only for Hisui — pulls from the regional pokédex endpoint,
+  // then resolves Hisuian form sprites for species that have a -hisui variant.
   getFromPokedex = (url) => {
     fetch(url)
       .then(checkStatus)
       .then(json)
-      .then((data) => {
+      .then(async (data) => {
         if (data.error) throw new Error(data.error);
-        const mons = [...(data.pokemon_entries || [])]
+
+        const baseEntries = [...(data.pokemon_entries || [])]
           .sort((a, b) => a.entry_number - b.entry_number)
           .map((entry) => ({
-            name: entry.pokemon_species.name,
-            id:   extractId(entry.pokemon_species.url),
+            name:      entry.pokemon_species.name,
+            id:        extractId(entry.pokemon_species.url),
+            formName:  HISUI_FORMS[entry.pokemon_species.name] || null,
           }))
           .filter((m) => m.id <= MAX_SPECIES_ID);
+
+        // Fetch sprites for entries that have a known Hisuian form
+        const formFetches = baseEntries.map((m) => {
+          if (!m.formName) return Promise.resolve(m);
+          return fetch(`https://pokeapi.co/api/v2/pokemon/${m.formName}`)
+            .then(checkStatus)
+            .then(json)
+            .then((d) => ({ ...m, name: d.name, sprite: d.sprites.front_default }))
+            .catch(() => m); // silently keep base entry if fetch fails
+        });
+
+        const mons = await Promise.all(formFetches);
         this.setState({ mons, loading: false });
       })
       .catch((err) => {

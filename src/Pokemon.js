@@ -121,6 +121,24 @@ class StatPanel extends React.Component {
   }
 }
 
+// ─── Canonical form overrides ────────────────────────────────────────────────
+// Some Pokémon (e.g. Giratina, Shaymin) have a base API entry whose official
+// artwork is null. Their named default form has real artwork. These are resolved
+// before fetching so the page never crashes on a null artwork URL.
+const CANONICAL_FORMS = {
+  'giratina': 'giratina-altered',
+  'shaymin':  'shaymin-land',
+  'basculin': 'basculin-red-striped',
+  'keldeo':   'keldeo-ordinary',
+  'meloetta': 'meloetta-aria',
+  'lycanroc': 'lycanroc-midday',
+  'toxtricity': 'toxtricity-amped',
+  'indeedee': 'indeedee-male',
+  'morpeko':  'morpeko-full-belly',
+  'urshifu':  'urshifu-single-strike',
+  'enamorus': 'enamorus-incarnate',
+};
+
 // ─── Main Pokemon page ────────────────────────────────────────────────────────
 class Pokemon extends React.Component {
   constructor(props) {
@@ -151,18 +169,20 @@ class Pokemon extends React.Component {
 
   getMon = () => {
     const { name, region } = this.state;
+    // Resolve canonical form if the base name has no valid artwork
+    const canonical = CANONICAL_FORMS[name] || name;
     // If a region hint is provided, try the regional form first (e.g. "vulpix-alola"),
-    // then silently fall back to the base name if it doesn't exist.
-    const tryFirst = region ? `${name}-${region}` : name;
+    // then silently fall back to the canonical name if it doesn't exist.
+    const tryFirst = region ? `${canonical}-${region}` : canonical;
 
     fetch(`https://pokeapi.co/api/v2/pokemon/${tryFirst}`)
       .then(checkStatus)
       .then(json)
       .then((data) => this.handleMonData(data))
       .catch(() => {
-        // Regional form didn't exist — fall back to the base name
-        if (tryFirst !== name) {
-          fetch(`https://pokeapi.co/api/v2/pokemon/${name}`)
+        // Regional form didn't exist — fall back to the canonical name
+        if (tryFirst !== canonical) {
+          fetch(`https://pokeapi.co/api/v2/pokemon/${canonical}`)
             .then(checkStatus)
             .then(json)
             .then((data) => this.handleMonData(data))
@@ -178,7 +198,7 @@ class Pokemon extends React.Component {
     // Update the displayed name to the actual loaded form (may differ from URL param)
     this.setState({
       name:    data.name,
-      imgLink: data.sprites.other['official-artwork']['front_default'],
+      imgLink: data.sprites.other?.['official-artwork']?.['front_default'] || '',
       stats,
       baseExp: data.base_experience,
     });
@@ -296,12 +316,15 @@ class Pokemon extends React.Component {
                   className="mon100"
                   src={imgLink}
                   alt={name}
-                  style={baseExp != null ? (() => {
+                  style={(() => {
+                    if (name.endsWith('-gmax')) return { width: 420, height: 420 };
+                    if (name === 'exeggutor-alola') return { width: 400, height: 400 };
+                    if (baseExp == null) return {};
                     const MIN_EXP = 36, MAX_EXP = 340, MIN_PX = 110, MAX_PX = 290;
                     const clamped = Math.max(MIN_EXP, Math.min(MAX_EXP, baseExp));
                     const size = Math.round(MIN_PX + (clamped - MIN_EXP) / (MAX_EXP - MIN_EXP) * (MAX_PX - MIN_PX));
                     return { width: size, height: size };
-                  })() : {}}
+                  })()}
                 />
               )}
             </div>
