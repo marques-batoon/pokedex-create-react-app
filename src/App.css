@@ -660,6 +660,19 @@
   gap: 0.75rem;
 }
 
+/* Desktop only */
+.poke-navbar__right--desktop {
+  display: flex;
+}
+.poke-navbar__right--mobile {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .poke-navbar__right--desktop { display: none; }
+  .poke-navbar__right--mobile  { display: flex; }
+}
+
 .poke-navbar__compare-link {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.65rem;
@@ -680,6 +693,89 @@
   border-color: var(--yellow);
   background: rgba(255, 203, 5, 0.07);
   text-decoration: none;
+}
+
+/* ─── Hamburger ──────────────────────────── */
+.poke-hamburger {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.poke-hamburger:hover { border-color: var(--yellow); }
+
+.poke-hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.25s;
+  transform-origin: center;
+}
+
+.poke-hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.poke-hamburger--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.poke-hamburger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ─── Mobile drawer ──────────────────────── */
+.poke-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.poke-drawer__inner {
+  position: absolute;
+  top: var(--navbar-h);
+  right: 0;
+  left: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  animation: fadeUp 0.2s ease;
+}
+
+.poke-drawer__link {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.poke-drawer__link:hover, .poke-drawer__link:active {
+  color: var(--text-primary);
+  border-color: var(--yellow);
+  background: rgba(255,203,5,0.07);
+  text-decoration: none;
+}
+.poke-drawer__link.poke-navbar__challenge-link:hover,
+.poke-drawer__link.poke-navbar__challenge-link:active {
+  border-color: var(--red) !important;
+  background: rgba(227,53,13,0.1) !important;
+  color: #fff !important;
 }
 
 /* ===========================
@@ -947,9 +1043,465 @@
 @media (max-width: 600px) {
   .compare-slots { flex-direction: column; }
   .compare-vs { padding-top: 0; align-self: center; }
-  .poke-navbar__compare-link { display: none; }
 }
 
+
+
+/* ===========================
+   CHALLENGE LINK (navbar)
+   =========================== */
+.poke-navbar__challenge-link:hover {
+  background: rgba(227,53,13,0.12) !important;
+  border-color: var(--red) !important;
+  color: #fff !important;
+}
+
+/* ===========================
+   CHALLENGE PAGE
+   =========================== */
+.challenge-page {
+  animation: fadeUp 0.4s ease;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.challenge-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.challenge-streak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.4rem 0.85rem;
+  min-width: 52px;
+}
+
+.challenge-streak--best {
+  opacity: 0.6;
+}
+
+.challenge-streak__label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.challenge-streak__count {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--yellow);
+  line-height: 1;
+  transition: transform 0.15s;
+}
+
+@keyframes streak-bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+.challenge-streak__count--bump {
+  animation: streak-bump 0.4s cubic-bezier(0.34,1.6,0.64,1);
+}
+
+/* Prompt */
+.challenge-prompt {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+.challenge-prompt__stat {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  color: var(--yellow);
+  font-weight: 900;
+}
+.challenge-prompt__tie {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Arena */
+.challenge-arena {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.challenge-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Cards */
+.challenge-card {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 2rem 1.25rem 1.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.34,1.4,0.64,1),
+              border-color 0.2s,
+              box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.challenge-card__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(circle at 50% 40%, rgba(255,203,5,0.18), transparent 70%);
+  pointer-events: none;
+}
+
+.challenge-card--idle:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(255,203,5,0.4);
+  box-shadow: 0 12px 30px rgba(255,203,5,0.15);
+}
+
+.challenge-card--idle:hover .challenge-card__glow {
+  opacity: 1;
+}
+
+.challenge-card--idle:active {
+  transform: scale(0.97);
+}
+
+/* Win state */
+@keyframes card-win-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(120,200,80,0.6); }
+  50%  { box-shadow: 0 0 0 12px rgba(120,200,80,0); }
+  100% { box-shadow: none; }
+}
+
+.challenge-card--win {
+  border-color: #78c850;
+  background: rgba(120,200,80,0.1);
+  animation: card-win-flash 0.6s ease forwards;
+}
+
+/* Lose state */
+@keyframes card-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+.challenge-card--lose {
+  border-color: var(--red);
+  background: rgba(227,53,13,0.1);
+  animation: card-shake 0.5s ease forwards;
+}
+
+/* Reveal (correct answer the user didn't pick) */
+.challenge-card--reveal {
+  border-color: rgba(255,203,5,0.5);
+  background: rgba(255,203,5,0.06);
+}
+
+.challenge-card__img {
+  width: clamp(160px, 20vw, 240px);
+  height: clamp(160px, 20vw, 240px);
+  object-fit: contain;
+  pointer-events: none;
+  transition: filter 0.3s;
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.45));
+  flex-shrink: 0;
+}
+
+.challenge-card--idle:hover .challenge-card__img {
+  filter: drop-shadow(0 12px 24px rgba(255,203,5,0.35));
+}
+
+.challenge-card__img--flipped {
+  transform: scaleX(-1);
+}
+
+.challenge-card__name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(0.58rem, 1.5vw, 0.75rem);
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Stat reveal after guess */
+.challenge-card__stat-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 0.35rem 0.9rem;
+  animation: fadeIn 0.3s ease;
+  pointer-events: none;
+}
+
+.challenge-card__stat-reveal--winner {
+  background: rgba(120,200,80,0.15);
+  border: 1px solid rgba(120,200,80,0.4);
+}
+
+.challenge-card__stat-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.challenge-card__stat-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.challenge-card__stat-reveal--winner .challenge-card__stat-val {
+  color: #78c850;
+}
+
+/* Win/Lose badge */
+.challenge-card__badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 900;
+  animation: scaleIn 0.3s cubic-bezier(0.34,1.6,0.64,1);
+}
+
+.challenge-card__badge--win {
+  background: #78c850;
+  color: #fff;
+}
+.challenge-card__badge--lose {
+  background: var(--red);
+  color: #fff;
+}
+
+/* Loading */
+.challenge-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@keyframes ball-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.challenge-loading__ball {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red) 50%, white 50%);
+  animation: ball-spin 0.8s linear infinite;
+  box-shadow: 0 4px 16px var(--red-glow);
+}
+
+/* ─── Game Over overlay ───────────────────────────────────────────────────────── */
+.challenge-gameover {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+
+.challenge-gameover__rays {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: victory-ray-spin 25s linear infinite;
+  pointer-events: none;
+}
+
+.challenge-gameover__ray {
+  position: absolute;
+  width: 2px;
+  height: 55vmax;
+  background: linear-gradient(to bottom, transparent, rgba(227,53,13,0.07), transparent);
+  transform-origin: center;
+  transform: rotate(calc(var(--i) * 45deg));
+}
+
+.challenge-gameover__box {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem 3rem;
+  text-align: center;
+  animation: scaleIn 0.4s cubic-bezier(0.34,1.4,0.64,1);
+  min-width: 260px;
+}
+
+.challenge-gameover__correct {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.challenge-gameover__sprite {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 12px rgba(227,53,13,0.4));
+  animation: scaleIn 0.4s cubic-bezier(0.34,1.6,0.64,1);
+}
+
+.challenge-gameover__correct-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.challenge-gameover__correct-label strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.challenge-gameover__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.challenge-gameover__score {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(3.5rem, 12vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #fff 20%, var(--red));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: scaleIn 0.5s cubic-bezier(0.34,1.6,0.64,1) 0.1s both;
+}
+
+.challenge-gameover__best {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.challenge-gameover__best strong {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--yellow);
+}
+
+.challenge-gameover__retry {
+  margin-top: 0.75rem;
+  background: var(--red);
+  border: none;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 20px var(--red-glow);
+}
+
+.challenge-gameover__retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px var(--red-glow);
+}
+
+@media (max-width: 600px) {
+  .challenge-arena {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .challenge-vs {
+    width: auto;
+    height: 32px;
+    flex-direction: row;
+    font-size: 0.75rem;
+  }
+  .challenge-card {
+    padding: 1.25rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .challenge-card__img {
+    width: clamp(120px, 35vw, 180px);
+    height: clamp(120px, 35vw, 180px);
+    flex-shrink: 0;
+  }
+  .challenge-card__img--flipped {
+    transform: none;
+  }
+}
 
 /* ===========================
    TEAM PAGE
@@ -1327,6 +1879,77 @@
   animation: fadeIn 0.4s ease;
 }
 .victory-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+
+/* ===========================
+   CHALLENGE GAME
+   =========================== */
+
+/* Challenge navbar link gets a special accent */
+.poke-navbar__compare-link--challenge {
+  border-color: rgba(248, 88, 136, 0.5);
+  color: #f85888;
+}
+.poke-navbar__compare-link--challenge:hover {
+  border-color: #f85888;
+  background: rgba(248, 88, 136, 0.1);
+  color: #f85888;
+}
+
+.challenge-page {
+  animation: fadeUp 0.4s ease;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Flash tint on correct/wrong */
+.challenge-page--correct { animation: flash-correct 0.6s ease; }
+.challenge-page--wrong   { animation: flash-wrong 0.6s ease; }
+
+@keyframes flash-correct {
+  0%, 100% { background: transparent; }
+  40%       { background: rgba(120, 200, 80, 0.08); border-radius: 16px; }
+}
+@keyframes flash-wrong {
+  0%, 100% { background: transparent; }
+  40%       { background: rgba(255, 80, 80, 0.1); border-radius: 16px; }
+}
+
+/* ─── Header row ─── */
+.challenge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.challenge-streak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.4rem 1rem;
+  min-width: 64px;
+}
+
+.challenge-streak__label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.challenge-streak__val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--yellow);
+  line-height: 1.1;
+}
 
 /* ===========================
    FOOTER
