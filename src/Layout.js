@@ -49,7 +49,7 @@ const Layout = (props) => {
           </a>
         </div>
         <p className="poke-footer__copy">
-          ©2021 Marques Batoon · Made with <span>♥</span>
+          ©2026 Marques Batoon
         </p>
       </footer>
     </React.Fragment>
