@@ -98,6 +98,164 @@ class TeamSlot extends React.Component {
   }
 }
 
+
+// ─── DraggableSprite ──────────────────────────────────────────────────────────
+// Two-element design:
+//   outer <div>  — handles absolute positioning via left/top (drag target)
+//   inner <img>  — plays CSS reveal/tap animations independently
+// This separates drag state from CSS animations so they never conflict.
+class DraggableSprite extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      // Absolute pixel position, initialised lazily on first drag
+      x: null, y: null,
+      dragging: false,
+      tapping: false,
+      revealed: false,  // true once entrance animation has finished
+    };
+    this._startMouseX = 0; this._startMouseY = 0;
+    this._startX = 0;      this._startY = 0;
+    this._moved = false;
+    this._tapTimer = null;
+    this.wrapRef = React.createRef();
+  }
+
+  componentWillUnmount() {
+    this._removeListeners();
+    clearTimeout(this._tapTimer);
+    clearTimeout(this._revealTimer);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Once the sprite becomes visible, mark revealed after the entrance animation finishes
+    if (!prevProps.visible && this.props.visible && !this.state.revealed) {
+      const delay = this.props.index * 80 + 550 + 100; // delay + duration + buffer
+      this._revealTimer = setTimeout(() => this.setState({ revealed: true }), delay);
+    }
+  }
+
+  onPointerDown = (e) => {
+    if (!this.props.draggable) return;
+    e.preventDefault();
+    const pt = e.touches ? e.touches[0] : e;
+
+    // On first drag, snapshot the element's current screen position
+    // so drag continues from exactly where it sits (accounting for the
+    // entrance animation that used CSS transforms).
+    let startX = this.state.x;
+    let startY = this.state.y;
+    if (startX === null) {
+      const rect = this.wrapRef.current.getBoundingClientRect();
+      startX = rect.left;
+      startY = rect.top;
+    }
+
+    this._startMouseX = pt.clientX;
+    this._startMouseY = pt.clientY;
+    this._startX = startX;
+    this._startY = startY;
+    this._moved = false;
+
+    this.setState({ dragging: true, x: startX, y: startY });
+    this._addListeners();
+  };
+
+  onPointerMove = (e) => {
+    const pt = e.touches ? e.touches[0] : e;
+    const ddx = pt.clientX - this._startMouseX;
+    const ddy = pt.clientY - this._startMouseY;
+    if (Math.abs(ddx) > 4 || Math.abs(ddy) > 4) this._moved = true;
+    this.setState({ x: this._startX + ddx, y: this._startY + ddy });
+  };
+
+  onPointerUp = () => {
+    this.setState({ dragging: false });
+    this._removeListeners();
+    if (!this._moved) this.triggerTap();
+  };
+
+  _addListeners = () => {
+    window.addEventListener('mousemove', this.onPointerMove);
+    window.addEventListener('mouseup', this.onPointerUp);
+    window.addEventListener('touchmove', this.onPointerMove, { passive: false });
+    window.addEventListener('touchend', this.onPointerUp);
+  };
+
+  _removeListeners = () => {
+    window.removeEventListener('mousemove', this.onPointerMove);
+    window.removeEventListener('mouseup', this.onPointerUp);
+    window.removeEventListener('touchmove', this.onPointerMove);
+    window.removeEventListener('touchend', this.onPointerUp);
+  };
+
+  triggerTap = () => {
+    // Force re-trigger by toggling off then on in next frame
+    this.setState({ tapping: false }, () => {
+      requestAnimationFrame(() => {
+        this.setState({ tapping: true });
+        clearTimeout(this._tapTimer);
+        this._tapTimer = setTimeout(() => this.setState({ tapping: false }), 600);
+      });
+    });
+  };
+
+  render() {
+    const { src, alt, index, visible } = this.props;
+    const { x, y, dragging, tapping, revealed } = this.state;
+    const positioned = x !== null;
+
+    // Outer wrapper: either CSS-positioned (during/after drag) or
+    // flow-positioned (before first drag, so the CSS entrance animation works).
+    const wrapStyle = positioned
+      ? {
+          position: 'fixed',
+          left: x,
+          top:  y,
+          width: 96,
+          height: 96,
+          zIndex: dragging ? 1000 : 10 + index,
+          cursor: dragging ? 'grabbing' : 'grab',
+          pointerEvents: 'auto',
+        }
+      : {
+          // Pre-drag: sit inside .victory-team flow so the CSS animation runs
+          position: 'absolute',
+          bottom: 0,
+          left: `calc(${index} * 64px)`,
+          width: 96,
+          height: 96,
+          zIndex: index,
+          cursor: 'grab',
+          pointerEvents: 'auto',
+        };
+    const imgClasses = [
+      'victory-sprite-img',
+      visible && !revealed ? 'victory-sprite-img--visible' : '',
+      revealed             ? 'victory-sprite-img--done'    : '',
+      dragging             ? 'victory-sprite-img--dragging' : '',
+      tapping              ? 'victory-sprite-img--tap'      : '',
+    ].filter(Boolean).join(' ');
+
+    return (
+      <div
+        ref={this.wrapRef}
+        style={wrapStyle}
+        onMouseDown={this.onPointerDown}
+        onTouchStart={this.onPointerDown}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className={imgClasses}
+          style={{ '--delay': `${index * 0.08}s` }}
+          draggable={false}
+        />
+      </div>
+    );
+  }
+}
+
 // ─── Victory Presentation overlay ─────────────────────────────────────────────
 class VictoryScreen extends React.Component {
   constructor(props) {
@@ -150,16 +308,17 @@ class VictoryScreen extends React.Component {
           <span className="victory-title__main">{displayTitle}</span>
         </div>
 
-        {/* Layered sprites */}
+        {/* Layered sprites — draggable once fully revealed */}
         {(phase === 'reveal' || phase === 'done') && (
           <div className="victory-team">
             {team.map((mon, i) => (
-              <img
+              <DraggableSprite
                 key={mon.name}
                 src={mon.sprite}
                 alt={mon.name}
-                className={`victory-sprite${i < revealed ? ' victory-sprite--visible' : ''}`}
-                style={{ '--i': i, '--delay': `${i * 0.08}s` }}
+                index={i}
+                visible={i < revealed}
+                draggable={phase === 'done'}
               />
             ))}
           </div>
