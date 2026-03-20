@@ -1,5 +1,6 @@
 import React from 'react';
 import { checkStatus, json } from './utils/fetchUtils';
+import { TypeBadge } from './typeColors';
 
 // ─── Form name formatter ──────────────────────────────────────────────────────
 const REGIONAL = { alola: 'Alolan', galar: 'Galarian', hisui: 'Hisuian', paldea: 'Paldean' };
@@ -153,6 +154,7 @@ class Pokemon extends React.Component {
       prevMon:      '',
       disabled:     true,
       nextDisabled: true,
+      types:        [],
       stats:        null,
       baseExp:      null,
       jaName:       '',
@@ -195,6 +197,7 @@ class Pokemon extends React.Component {
     const stats = {};
     data.stats.forEach((s) => { stats[s.stat.name] = s.base_stat; });
 
+    const types = data.types.map((t) => t.type.name);
     // Update the displayed name to the actual loaded form (may differ from URL param)
     this.setState({
       name:    data.name,
@@ -207,6 +210,7 @@ class Pokemon extends React.Component {
       ),
       stats,
       baseExp: data.base_experience,
+      types,
     });
 
     const mon0    = data.species.url;
@@ -277,7 +281,7 @@ class Pokemon extends React.Component {
   };
 
   render() {
-    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName, allVarieties, baseName } = this.state;
+    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName, allVarieties, baseName, types } = this.state;
 
     // Only show form pills when there are 2+ varieties
     const showForms = allVarieties.length > 1;
@@ -297,6 +301,12 @@ class Pokemon extends React.Component {
           <h1 className="pokemon-detail__name">{name}</h1>
           {jaName && <span className="pokemon-detail__ja-name">{jaName}</span>}
         </div>
+
+        {types.length > 0 && (
+          <div className="type-badges">
+            {types.map((t) => <TypeBadge key={t} type={t} />)}
+          </div>
+        )}
 
         {showForms && (
           <div className="pokemon-forms">

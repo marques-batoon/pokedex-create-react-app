@@ -562,6 +562,33 @@
   }
 }
 
+
+/* ===========================
+   TYPE BADGES
+   =========================== */
+.type-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.type-badges--centered {
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: fadeIn 0.3s ease;
+}
+
 /* ===========================
    REGIONAL FORM PILLS
    =========================== */

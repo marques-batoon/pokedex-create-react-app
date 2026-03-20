@@ -1,5 +1,6 @@
 import React from 'react';
 import { checkStatus, json } from './utils/fetchUtils';
+import { TypeBadge } from './typeColors';
 
 // ─── Shared stat config ───────────────────────────────────────────────────────
 const STATS = [
@@ -66,6 +67,7 @@ class PokemonSlot extends React.Component {
           imgLink: getArtwork(data),
           stats:   buildStats(data),
           baseExp: data.base_experience,
+          types:   data.types.map((t) => t.type.name),
         });
       })
       .catch(() => {
@@ -108,6 +110,9 @@ class PokemonSlot extends React.Component {
               />
             </div>
             <p className="compare-slot__name">{mon.name}</p>
+            <div className="type-badges type-badges--centered">
+              {mon.types.map((t) => <TypeBadge key={t} type={t} />)}
+            </div>
             <p className="compare-slot__total">
               BST <span>{totalStats(mon.stats)}</span>
             </p>
