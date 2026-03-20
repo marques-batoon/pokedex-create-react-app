@@ -660,6 +660,19 @@
   gap: 0.75rem;
 }
 
+/* Desktop only */
+.poke-navbar__right--desktop {
+  display: flex;
+}
+.poke-navbar__right--mobile {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .poke-navbar__right--desktop { display: none; }
+  .poke-navbar__right--mobile  { display: flex; }
+}
+
 .poke-navbar__compare-link {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.65rem;
@@ -680,6 +693,89 @@
   border-color: var(--yellow);
   background: rgba(255, 203, 5, 0.07);
   text-decoration: none;
+}
+
+/* ─── Hamburger ──────────────────────────── */
+.poke-hamburger {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.poke-hamburger:hover { border-color: var(--yellow); }
+
+.poke-hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.25s;
+  transform-origin: center;
+}
+
+.poke-hamburger--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.poke-hamburger--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.poke-hamburger--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ─── Mobile drawer ──────────────────────── */
+.poke-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.poke-drawer__inner {
+  position: absolute;
+  top: var(--navbar-h);
+  right: 0;
+  left: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  animation: fadeUp 0.2s ease;
+}
+
+.poke-drawer__link {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.poke-drawer__link:hover, .poke-drawer__link:active {
+  color: var(--text-primary);
+  border-color: var(--yellow);
+  background: rgba(255,203,5,0.07);
+  text-decoration: none;
+}
+.poke-drawer__link.poke-navbar__challenge-link:hover,
+.poke-drawer__link.poke-navbar__challenge-link:active {
+  border-color: var(--red) !important;
+  background: rgba(227,53,13,0.1) !important;
+  color: #fff !important;
 }
 
 /* ===========================
@@ -947,7 +1043,6 @@
 @media (max-width: 600px) {
   .compare-slots { flex-direction: column; }
   .compare-vs { padding-top: 0; align-self: center; }
-  .poke-navbar__compare-link { display: none; }
 }
 
 
@@ -955,10 +1050,6 @@
 /* ===========================
    CHALLENGE LINK (navbar)
    =========================== */
-.poke-navbar__challenge-link {
-  border-color: var(--red) !important;
-  color: var(--red) !important;
-}
 .poke-navbar__challenge-link:hover {
   background: rgba(227,53,13,0.12) !important;
   border-color: var(--red) !important;
@@ -1044,36 +1135,34 @@
 
 /* Arena */
 .challenge-arena {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
 }
 
 .challenge-vs {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
   font-family: 'Orbitron', sans-serif;
   font-weight: 900;
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  background: var(--bg-primary);
-  padding: 0.3rem 0.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  z-index: 2;
   pointer-events: none;
+  z-index: 2;
 }
 
 /* Cards */
 .challenge-card {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: 18px;
-  padding: 1.5rem 1rem 1rem;
+  padding: 1.25rem 1rem 1.25rem;
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.34,1.4,0.64,1),
@@ -1144,12 +1233,13 @@
 }
 
 .challenge-card__img {
-  width: clamp(90px, 18vw, 150px);
-  height: clamp(90px, 18vw, 150px);
+  width: 140px;
+  height: 140px;
   object-fit: contain;
   pointer-events: none;
   transition: filter 0.3s;
   filter: drop-shadow(0 8px 18px rgba(0,0,0,0.4));
+  flex-shrink: 0;
 }
 
 .challenge-card--idle:hover .challenge-card__img {
@@ -1353,8 +1443,35 @@
 }
 
 @media (max-width: 600px) {
-  .challenge-arena { gap: 0.6rem; }
-  .challenge-card { padding: 1rem 0.5rem 0.75rem; }
+  .challenge-arena {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .challenge-vs {
+    width: auto;
+    height: 32px;
+    flex-direction: row;
+    font-size: 0.75rem;
+  }
+  .challenge-card {
+    padding: 1rem 0.75rem;
+    flex-direction: row;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .challenge-card__img {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+  .challenge-card__glow {
+    display: none;
+  }
+  /* On mobile the left card is no longer "facing right" so remove the flip */
+  .challenge-card:first-child .challenge-card__img {
+    transform: none !important;
+  }
 }
 
 /* ===========================

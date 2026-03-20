@@ -200,7 +200,7 @@ class Challenge extends React.Component {
 
         {/* Cards */}
         <div className="challenge-arena">
-          {[{ mon: monA, side: 'A' }, { mon: monB, side: 'B' }].map(({ mon, side }) => {
+          {[{ mon: monA, side: 'A' }, { mon: monB, side: 'B' }].map(({ mon, side }, idx) => {
             const val = mon.stats[stat.key];
             const isChosen = chosenSide === side;
             const otherVal = side === 'A' ? valB : valA;
@@ -213,35 +213,36 @@ class Challenge extends React.Component {
             }
 
             return (
-              <button
-                key={side}
-                className={`challenge-card challenge-card--${cardState || 'idle'}`}
-                onClick={() => this.handleGuess(side)}
-                disabled={phase !== 'playing'}
-              >
-                <div className="challenge-card__glow" />
-                <img
-                  src={mon.imgLink}
-                  alt={mon.name}
-                  className="challenge-card__img"
-                />
-                <p className="challenge-card__name">{mon.name}</p>
+              <React.Fragment key={side}>
+                <button
+                  className={`challenge-card challenge-card--${cardState || 'idle'}`}
+                  onClick={() => this.handleGuess(side)}
+                  disabled={phase !== 'playing'}
+                >
+                  <div className="challenge-card__glow" />
+                  <img
+                    src={mon.imgLink}
+                    alt={mon.name}
+                    className="challenge-card__img"
+                    style={side === 'A' ? { transform: 'scaleX(-1)' } : {}}
+                  />
+                  <p className="challenge-card__name">{mon.name}</p>
 
-                {/* Reveal stat value after guess */}
-                {(phase === 'correct' || phase === 'wrong') && (
-                  <div className={`challenge-card__stat-reveal${cardState === 'win' || cardState === 'reveal' ? ' challenge-card__stat-reveal--winner' : ''}`}>
-                    <span className="challenge-card__stat-label">{stat.label}</span>
-                    <span className="challenge-card__stat-val">{val}</span>
-                  </div>
-                )}
+                  {/* Reveal stat value after guess */}
+                  {(phase === 'correct' || phase === 'wrong') && (
+                    <div className={`challenge-card__stat-reveal${cardState === 'win' || cardState === 'reveal' ? ' challenge-card__stat-reveal--winner' : ''}`}>
+                      <span className="challenge-card__stat-label">{stat.label}</span>
+                      <span className="challenge-card__stat-val">{val}</span>
+                    </div>
+                  )}
 
-                {cardState === 'win' && <span className="challenge-card__badge challenge-card__badge--win">✓</span>}
-                {cardState === 'lose' && <span className="challenge-card__badge challenge-card__badge--lose">✗</span>}
-              </button>
+                  {cardState === 'win' && <span className="challenge-card__badge challenge-card__badge--win">✓</span>}
+                  {cardState === 'lose' && <span className="challenge-card__badge challenge-card__badge--lose">✗</span>}
+                </button>
+                {idx === 0 && <div className="challenge-vs">VS</div>}
+              </React.Fragment>
             );
           })}
-
-          <div className="challenge-vs">VS</div>
         </div>
       </div>
     );

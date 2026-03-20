@@ -14,13 +14,13 @@ const InstagramIcon = () => (
 );
 
 const SearchIcon = () => (
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="7" />
     <line x1="16.5" y1="16.5" x2="22" y2="22" />
   </svg>
 );
 
-const NavSearch = () => {
+const NavSearch = ({ onNavigate }) => {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
 
@@ -29,6 +29,7 @@ const NavSearch = () => {
     const trimmed = query.trim().toLowerCase().replace(/\s+/g, '-');
     if (!trimmed) return;
     setQuery('');
+    if (onNavigate) onNavigate();
     window.location.href = `/pokemon?name=${trimmed}`;
   };
 
@@ -50,21 +51,64 @@ const NavSearch = () => {
   );
 };
 
+const NAV_LINKS = [
+  { to: '/challenge', label: 'Challenge', className: 'poke-navbar__challenge-link' },
+  { to: '/team',      label: 'Team',      className: '' },
+  { to: '/compare',   label: 'Compare',   className: '' },
+];
+
 const Layout = (props) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const close = () => setMenuOpen(false);
+
   return (
     <React.Fragment>
       <nav className="poke-navbar">
-        <Link to="/" className="poke-navbar__brand">
+        <Link to="/" className="poke-navbar__brand" onClick={close}>
           <div className="poke-navbar__logo" />
           <span>Pokédex</span>
         </Link>
-        <div className="poke-navbar__right">
-          <Link to="/challenge" className="poke-navbar__compare-link poke-navbar__challenge-link">Challenge</Link>
-          <Link to="/team" className="poke-navbar__compare-link">Team</Link>
-          <Link to="/compare" className="poke-navbar__compare-link">Compare</Link>
+
+        {/* Desktop right group */}
+        <div className="poke-navbar__right poke-navbar__right--desktop">
+          {NAV_LINKS.map(({ to, label, className }) => (
+            <Link key={to} to={to} className={`poke-navbar__compare-link ${className}`}>
+              {label}
+            </Link>
+          ))}
           <NavSearch />
         </div>
+
+        {/* Mobile: search + hamburger */}
+        <div className="poke-navbar__right poke-navbar__right--mobile">
+          <NavSearch onNavigate={close} />
+          <button
+            className={`poke-hamburger${menuOpen ? ' poke-hamburger--open' : ''}`}
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+          >
+            <span /><span /><span />
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile drawer */}
+      {menuOpen && (
+        <div className="poke-drawer" onClick={close}>
+          <div className="poke-drawer__inner" onClick={(e) => e.stopPropagation()}>
+            {NAV_LINKS.map(({ to, label, className }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`poke-drawer__link ${className}`}
+                onClick={close}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <main className="main-content">
         {props.children}
@@ -73,12 +117,10 @@ const Layout = (props) => {
       <footer className="poke-footer">
         <div className="poke-footer__links">
           <a href="https://www.github.com/marques-batoon" rel="noreferrer" target="_blank" className="poke-footer__link">
-            <GitHubIcon />
-            GitHub
+            <GitHubIcon /> GitHub
           </a>
           <a href="https://www.instagram.com/batoonworld/" rel="noreferrer" target="_blank" className="poke-footer__link">
-            <InstagramIcon />
-            Instagram
+            <InstagramIcon /> Instagram
           </a>
         </div>
         <p className="poke-footer__copy">©2026 Marques Batoon</p>
