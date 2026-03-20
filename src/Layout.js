@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const GitHubIcon = () => (
@@ -59,11 +59,30 @@ const NAV_LINKS = [
 
 const Layout = (props) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const close = () => setMenuOpen(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY <= 10) {
+        setNavVisible(true);
+      } else if (currentY < lastScrollY.current) {
+        setNavVisible(true);   // scrolling up
+      } else if (currentY > lastScrollY.current + 6) {
+        setNavVisible(false);  // scrolling down (6px threshold avoids micro-jitter)
+        setMenuOpen(false);    // close drawer when hiding
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <React.Fragment>
-      <nav className="poke-navbar">
+      <nav className={`poke-navbar${navVisible ? '' : ' poke-navbar--hidden'}`}>
         <Link to="/" className="poke-navbar__brand" onClick={close}>
           <div className="poke-navbar__logo" />
           <span>Pokédex</span>
