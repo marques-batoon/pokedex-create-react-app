@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getPokemonNames } from './SearchInput';
 import { Link } from 'react-router-dom';
 
 const GitHubIcon = () => (
@@ -20,34 +21,112 @@ const SearchIcon = () => (
   </svg>
 );
 
+const MAX_SUGGESTIONS = 8;
+
 const NavSearch = ({ onNavigate }) => {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const [names, setNames] = useState(null);
+  const wrapRef = useRef(null);
+
+  // Load name list on mount
+  useEffect(() => {
+    getPokemonNames().then(setNames).catch(() => {});
+  }, []);
+
+  // Recompute suggestions whenever query or names change
+  useEffect(() => {
+    if (!names || !query.trim()) { setSuggestions([]); setActiveIdx(-1); return; }
+    const q = query.trim().toLowerCase().replace(/\s+/g, '-');
+    const matches = names
+      .filter((n) => n.includes(q))
+      .sort((a, b) => {
+        const aStart = a.startsWith(q);
+        const bStart = b.startsWith(q);
+        if (aStart && !bStart) return -1;
+        if (!aStart && bStart) return 1;
+        return a.length - b.length;
+      })
+      .slice(0, MAX_SUGGESTIONS);
+    setSuggestions(matches);
+    setActiveIdx(-1);
+  }, [query, names]);
+
+  const navigate = (name) => {
+    setQuery('');
+    setSuggestions([]);
+    setActiveIdx(-1);
+    if (onNavigate) onNavigate();
+    window.location.href = `/pokemon?name=${name}`;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const trimmed = query.trim().toLowerCase().replace(/\s+/g, '-');
-    if (!trimmed) return;
-    setQuery('');
-    if (onNavigate) onNavigate();
-    window.location.href = `/pokemon?name=${trimmed}`;
+    if (activeIdx >= 0 && suggestions[activeIdx]) {
+      navigate(suggestions[activeIdx]);
+    } else if (suggestions.length > 0) {
+      navigate(suggestions[0]);
+    } else {
+      const trimmed = query.trim().toLowerCase().replace(/\s+/g, '-');
+      if (!trimmed) return;
+      navigate(trimmed);
+    }
   };
 
+  const handleKeyDown = (e) => {
+    if (!suggestions.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(i - 1, -1));
+    } else if (e.key === 'Escape') {
+      setSuggestions([]);
+      setActiveIdx(-1);
+    }
+  };
+
+  const handleBlur = () => {
+    // Small delay so click on suggestion fires before blur hides the list
+    setTimeout(() => { setFocused(false); setSuggestions([]); setActiveIdx(-1); }, 150);
+  };
+
+  const showSuggestions = focused && suggestions.length > 0;
+
   return (
-    <form className={`nav-search${focused ? ' nav-search--focused' : ''}`} onSubmit={handleSubmit}>
-      <span className="nav-search__icon"><SearchIcon /></span>
-      <input
-        className="nav-search__input"
-        type="text"
-        placeholder="Search Pokémon…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        spellCheck={false}
-        autoComplete="off"
-      />
-    </form>
+    <div className="nav-search-wrap" ref={wrapRef}>
+      <form className={`nav-search${focused ? ' nav-search--focused' : ''}`} onSubmit={handleSubmit}>
+        <span className="nav-search__icon"><SearchIcon /></span>
+        <input
+          className="nav-search__input"
+          type="text"
+          placeholder="Search Pokémon…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          spellCheck={false}
+          autoComplete="off"
+        />
+      </form>
+      {showSuggestions && (
+        <ul className="nav-search__suggestions">
+          {suggestions.map((name, i) => (
+            <li
+              key={name}
+              className={`nav-search__suggestion${i === activeIdx ? ' nav-search__suggestion--active' : ''}`}
+              onMouseDown={() => navigate(name)}
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 };
 

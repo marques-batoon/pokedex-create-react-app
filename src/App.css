@@ -507,6 +507,70 @@
 
 
 
+
+/* ===========================
+   SHARED SEARCH SUGGESTIONS
+   =========================== */
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  list-style: none;
+  padding: 0.35rem;
+  margin: 0;
+  z-index: 300;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  animation: fadeUp 0.15s ease;
+  min-width: 180px;
+}
+
+.search-suggestion {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-suggestion:hover,
+.search-suggestion--active {
+  background: rgba(255,203,5,0.1);
+  color: var(--text-primary);
+}
+
+.search-suggestion--active {
+  border-left: 2px solid var(--yellow);
+  padding-left: calc(0.75rem - 2px);
+}
+
+/* Make compare slot form a relative container for the dropdown */
+.compare-slot__suggest-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Make team slot form a relative container for the dropdown */
+.team-slot__suggest-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ===========================
    NAV SEARCH
    =========================== */
@@ -560,6 +624,54 @@
 .nav-search__input::placeholder {
   color: var(--text-muted);
   font-weight: 400;
+}
+
+
+/* ─── Search suggestions ──── */
+.nav-search-wrap {
+  position: relative;
+}
+
+.nav-search__suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  list-style: none;
+  padding: 0.35rem;
+  margin: 0;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  animation: fadeUp 0.15s ease;
+  min-width: 220px;
+}
+
+.nav-search__suggestion {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-search__suggestion:hover,
+.nav-search__suggestion--active {
+  background: rgba(255,203,5,0.1);
+  color: var(--text-primary);
+}
+
+.nav-search__suggestion--active {
+  border-left: 2px solid var(--yellow);
+  padding-left: calc(0.75rem - 2px);
 }
 
 @media (max-width: 600px) {

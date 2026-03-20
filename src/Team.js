@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { checkStatus, json } from './utils/fetchUtils';
+import SearchInput from './SearchInput';
 import { TypeBadge } from './typeColors';
 
 const CANONICAL_FORMS = {
@@ -28,9 +29,8 @@ class TeamSlot extends React.Component {
     this.state = { query: '', loading: false, error: '' };
   }
 
-  handleSearch = (e) => {
-    e.preventDefault();
-    const trimmed = this.state.query.trim().toLowerCase().replace(/\s+/g, '-');
+  fetchPokemon = (name) => {
+    const trimmed = name.trim().toLowerCase().replace(/\s+/g, '-');
     if (!trimmed) return;
     this.setState({ loading: true, error: '' });
     const canonical = CANONICAL_FORMS[trimmed] || trimmed;
@@ -46,7 +46,7 @@ class TeamSlot extends React.Component {
           types:   data.types.map((t) => t.type.name),
         });
       })
-      .catch(() => this.setState({ loading: false, error: `Not found` }));
+      .catch(() => this.setState({ loading: false, error: 'Not found' }));
   };
 
   render() {
@@ -74,20 +74,23 @@ class TeamSlot extends React.Component {
             >×</button>
           </div>
         ) : (
-          <form className="team-slot__form" onSubmit={this.handleSearch}>
-            <input
-              className="team-slot__input"
-              type="text"
-              placeholder={`Pokémon ${slotNum}…`}
+          <div className="team-slot__form">
+            <SearchInput
               value={query}
-              onChange={(e) => this.setState({ query: e.target.value })}
-              spellCheck={false}
-              autoComplete="off"
+              onChange={(v) => this.setState({ query: v })}
+              onSubmit={this.fetchPokemon}
+              placeholder={`Pokémon ${slotNum}…`}
+              inputClass="team-slot__input"
+              suggestClass="team-slot__suggest-wrap"
             />
-            <button className="team-slot__btn" type="submit">
+            <button
+              className="team-slot__btn"
+              type="button"
+              onClick={() => this.fetchPokemon(query)}
+            >
               {loading ? '…' : '+'}
             </button>
-          </form>
+          </div>
         )}
         {error && <p className="team-slot__error">{error}</p>}
       </div>

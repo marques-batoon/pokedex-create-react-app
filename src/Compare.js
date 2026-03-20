@@ -1,5 +1,6 @@
 import React from 'react';
 import { checkStatus, json } from './utils/fetchUtils';
+import SearchInput from './SearchInput';
 import { TypeBadge } from './typeColors';
 
 // ─── Shared stat config ───────────────────────────────────────────────────────
@@ -50,18 +51,16 @@ class PokemonSlot extends React.Component {
     this.state = { query: '', loading: false, error: '' };
   }
 
-  handleSearch = (e) => {
-    e.preventDefault();
-    const trimmed = this.state.query.trim().toLowerCase().replace(/\s+/g, '-');
+  fetchPokemon = (name) => {
+    const trimmed = name.trim().toLowerCase().replace(/\s+/g, '-');
     if (!trimmed) return;
     this.setState({ loading: true, error: '' });
-
     const canonical = CANONICAL_FORMS[trimmed] || trimmed;
     fetch(`https://pokeapi.co/api/v2/pokemon/${canonical}`)
       .then(checkStatus)
       .then(json)
       .then((data) => {
-        this.setState({ loading: false });
+        this.setState({ loading: false, query: '' });
         this.props.onLoad({
           name:    data.name,
           imgLink: getArtwork(data),
@@ -82,21 +81,25 @@ class PokemonSlot extends React.Component {
     return (
       <div className="compare-slot">
         {/* Search form */}
-        <form className="compare-slot__form" onSubmit={this.handleSearch}>
-          <input
-            className="compare-slot__input"
-            type="text"
-            placeholder="Enter Pokémon name…"
+        <div className="compare-slot__form">
+          <SearchInput
             value={query}
-            onChange={(e) => this.setState({ query: e.target.value })}
-            spellCheck={false}
-            autoComplete="off"
-            style={{ '--slot-color': accentColor }}
+            onChange={(v) => this.setState({ query: v })}
+            onSubmit={this.fetchPokemon}
+            placeholder="Enter Pokémon name…"
+            inputClass="compare-slot__input"
+            inputStyle={{ '--slot-color': accentColor }}
+            suggestClass="compare-slot__suggest-wrap"
           />
-          <button className="compare-slot__btn" type="submit" style={{ background: accentColor }}>
+          <button
+            className="compare-slot__btn"
+            type="button"
+            style={{ background: accentColor }}
+            onClick={() => this.fetchPokemon(query)}
+          >
             {loading ? '…' : 'Go'}
           </button>
-        </form>
+        </div>
         {error && <p className="compare-slot__error">{error}</p>}
 
         {/* Card */}
