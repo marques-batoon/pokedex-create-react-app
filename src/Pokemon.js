@@ -198,7 +198,13 @@ class Pokemon extends React.Component {
     // Update the displayed name to the actual loaded form (may differ from URL param)
     this.setState({
       name:    data.name,
-      imgLink: data.sprites.other?.['official-artwork']?.['front_default'] || '',
+      imgLink: (
+        data.sprites.other?.['official-artwork']?.['front_default'] ||
+        data.sprites.other?.['official-artwork']?.['front_shiny'] ||
+        data.sprites.other?.home?.front_default ||
+        data.sprites.front_default ||
+        ''
+      ),
       stats,
       baseExp: data.base_experience,
     });
@@ -223,10 +229,12 @@ class Pokemon extends React.Component {
         if (jaEntry) this.setState({ jaName: jaEntry.name });
 
         // ALL varieties (default + non-default) for the form toggle
-        const allVarieties = (data.varieties || []).map((v) => ({
-          name:      v.pokemon.name,
-          isDefault: v.is_default,
-        }));
+        const allVarieties = (data.varieties || [])
+          .filter((v) => !v.pokemon.name.includes('-totem'))
+          .map((v) => ({
+            name:      v.pokemon.name,
+            isDefault: v.is_default,
+          }));
 
         // The default variety name = the base species name
         const defaultVariety = allVarieties.find((v) => v.isDefault);

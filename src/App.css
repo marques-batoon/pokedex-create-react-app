@@ -500,6 +500,68 @@
 }
 
 
+
+/* ===========================
+   NAV SEARCH
+   =========================== */
+.nav-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.35rem 0.75rem;
+  transition: all 0.25s;
+  width: 220px;
+}
+
+.nav-search--focused {
+  border-color: var(--red);
+  background: rgba(227, 53, 13, 0.06);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+
+.nav-search__icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.nav-search__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.nav-search--focused .nav-search__icon {
+  color: var(--red);
+}
+
+.nav-search__input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  width: 100%;
+  caret-color: var(--red);
+}
+
+.nav-search__input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  .nav-search {
+    width: 130px;
+  }
+}
+
 /* ===========================
    REGIONAL FORM PILLS
    =========================== */

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const GitHubIcon = () => (
@@ -13,6 +13,43 @@ const InstagramIcon = () => (
   </svg>
 );
 
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="7" />
+    <line x1="16.5" y1="16.5" x2="22" y2="22" />
+  </svg>
+);
+
+const NavSearch = () => {
+  const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const trimmed = query.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!trimmed) return;
+    setQuery('');
+    window.location.href = `/pokemon?name=${trimmed}`;
+  };
+
+  return (
+    <form className={`nav-search${focused ? ' nav-search--focused' : ''}`} onSubmit={handleSubmit}>
+      <span className="nav-search__icon"><SearchIcon /></span>
+      <input
+        className="nav-search__input"
+        type="text"
+        placeholder="Search Pokémon…"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        spellCheck={false}
+        autoComplete="off"
+      />
+    </form>
+  );
+};
+
 const Layout = (props) => {
   return (
     <React.Fragment>
@@ -21,6 +58,7 @@ const Layout = (props) => {
           <div className="poke-navbar__logo" />
           <span>Pokédex</span>
         </Link>
+        <NavSearch />
       </nav>
 
       <main className="main-content">
@@ -29,28 +67,16 @@ const Layout = (props) => {
 
       <footer className="poke-footer">
         <div className="poke-footer__links">
-          <a
-            href="https://www.github.com/marques-batoon"
-            rel="noreferrer"
-            target="_blank"
-            className="poke-footer__link"
-          >
+          <a href="https://www.github.com/marques-batoon" rel="noreferrer" target="_blank" className="poke-footer__link">
             <GitHubIcon />
             GitHub
           </a>
-          <a
-            href="https://www.instagram.com/batoonworld/"
-            rel="noreferrer"
-            target="_blank"
-            className="poke-footer__link"
-          >
+          <a href="https://www.instagram.com/batoonworld/" rel="noreferrer" target="_blank" className="poke-footer__link">
             <InstagramIcon />
             Instagram
           </a>
         </div>
-        <p className="poke-footer__copy">
-          ©2026 Marques Batoon
-        </p>
+        <p className="poke-footer__copy">©2026 Marques Batoon</p>
       </footer>
     </React.Fragment>
   );
