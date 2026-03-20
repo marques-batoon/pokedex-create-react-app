@@ -1,6 +1,28 @@
 import React from 'react';
 import { checkStatus, json } from './utils/fetchUtils';
 
+
+// ─── Form name formatter ──────────────────────────────────────────────────────
+// Turns "vulpix-alola" → "Alolan Form", "dialga-origin" → "Origin Forme", etc.
+const REGIONAL = { alola: 'Alolan', galar: 'Galarian', hisui: 'Hisuian', paldea: 'Paldean' };
+
+function formatFormName(fullName) {
+  const parts = fullName.split('-');
+  // Drop the base species name (first part) and join the rest
+  const suffix = parts.slice(1).join('-');
+  if (!suffix) return fullName;
+
+  // Regional variants get "X Form"
+  if (REGIONAL[suffix]) return `${REGIONAL[suffix]} Form`;
+
+  // Everything else: title-case each word + "Forme"
+  const titled = suffix
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  return `${titled} Forme`;
+}
+
 // ─── Stat calculation (standard competitive formulas) ────────────────────────
 // HP:    floor((2*Base + IV + floor(EV/4)) * Lv/100) + Lv + 10
 // Other: floor((floor((2*Base + IV + floor(EV/4)) * Lv/100) + 5) * Nature)
@@ -161,6 +183,7 @@ class Pokemon extends React.Component {
       stats:        null,
       baseExp:      null,
       jaName:       '',
+      forms:        [],
     };
   }
 
@@ -203,8 +226,16 @@ class Pokemon extends React.Component {
       .then(json)
       .then((data) => {
         if (data.error) throw new Error(data.error);
+
+        // Japanese name
         const jaEntry = data.names.find((n) => n.language.name === 'ja');
         if (jaEntry) this.setState({ jaName: jaEntry.name });
+
+        // Non-default varieties = regional / alternate forms
+        const forms = (data.varieties || [])
+          .filter((v) => !v.is_default)
+          .map((v) => v.pokemon.name);
+        this.setState({ forms });
       })
       .catch((error) => console.log(error.message));
   };
@@ -245,7 +276,7 @@ class Pokemon extends React.Component {
   };
 
   render() {
-    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName } = this.state;
+    const { name, imgLink, disabled, nextDisabled, stats, baseExp, jaName, forms } = this.state;
 
     return (
       <div className="pokemon-detail">
@@ -262,6 +293,20 @@ class Pokemon extends React.Component {
           <h1 className="pokemon-detail__name">{name}</h1>
           {jaName && <span className="pokemon-detail__ja-name">{jaName}</span>}
         </div>
+
+        {forms.length > 0 && (
+          <div className="pokemon-forms">
+            {forms.map((formName) => (
+              <a
+                key={formName}
+                href={`/pokemon?name=${formName}`}
+                className="pokemon-form-pill"
+              >
+                {formatFormName(formName)}
+              </a>
+            ))}
+          </div>
+        )}
 
         <div className="container">
           <div className="row justify-content-center">
