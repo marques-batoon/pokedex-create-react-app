@@ -59,6 +59,7 @@ const Layout = (props) => {
           <span>Pokédex</span>
         </Link>
         <div className="poke-navbar__right">
+          <Link to="/challenge" className="poke-navbar__compare-link poke-navbar__challenge-link">Challenge</Link>
           <Link to="/team" className="poke-navbar__compare-link">Team</Link>
           <Link to="/compare" className="poke-navbar__compare-link">Compare</Link>
           <NavSearch />
