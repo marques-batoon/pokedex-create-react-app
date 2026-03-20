@@ -124,7 +124,9 @@ class VictoryScreen extends React.Component {
   };
 
   render() {
-    const { team, onClose } = this.props;
+    const { team, onClose, championName } = this.props;
+    const validName = championName && championName.length >= 3 && championName.length <= 15;
+    const displayTitle = validName ? championName : 'Your Team';
     const { phase, revealed } = this.state;
 
     return ReactDOM.createPortal(
@@ -142,7 +144,7 @@ class VictoryScreen extends React.Component {
         {/* Champion title */}
         <div className={`victory-title${phase === 'title' || phase === 'reveal' || phase === 'done' ? ' victory-title--visible' : ''}`}>
           <span className="victory-title__top">✦ Champion ✦</span>
-          <span className="victory-title__main">Your Team</span>
+          <span className="victory-title__main">{displayTitle}</span>
         </div>
 
         {/* Layered sprites */}
@@ -197,6 +199,7 @@ class Team extends React.Component {
     this.state = {
       team: Array(TEAM_SIZE).fill(null),
       presenting: false,
+      championName: '',
     };
   }
 
@@ -229,6 +232,7 @@ class Team extends React.Component {
       return (
         <VictoryScreen
           team={filled}
+          championName={this.state.championName.trim()}
           onClose={() => this.setState({ presenting: false })}
         />
       );
@@ -251,6 +255,23 @@ class Team extends React.Component {
               onRemove={() => this.removeSlot(i)}
             />
           ))}
+        </div>
+
+        <div className="team-name-input">
+          <label className="team-name-input__label" htmlFor="champion-name">
+            Champion Name <span className="team-name-input__hint">(optional, 3–15 chars)</span>
+          </label>
+          <input
+            id="champion-name"
+            className="team-name-input__field"
+            type="text"
+            maxLength={15}
+            placeholder="Enter your name…"
+            value={this.state.championName}
+            onChange={(e) => this.setState({ championName: e.target.value })}
+            spellCheck={false}
+            autoComplete="off"
+          />
         </div>
 
         <div className="team-page__actions">

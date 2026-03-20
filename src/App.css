@@ -1649,6 +1649,56 @@
 }
 .team-slot__remove:hover { background: var(--red); border-color: var(--red); color: #fff; }
 
+
+/* ─── Team name input ──────── */
+.team-name-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  max-width: 320px;
+}
+
+.team-name-input__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.team-name-input__hint {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.7;
+}
+
+.team-name-input__field {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  color: var(--text-primary);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  outline: none;
+  caret-color: var(--yellow);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.team-name-input__field:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px var(--yellow-glow);
+}
+
+.team-name-input__field::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-family: 'Nunito', sans-serif;
+}
+
 /* ─── Actions ─────────────── */
 .team-page__actions {
   display: flex;

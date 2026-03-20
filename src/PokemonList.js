@@ -54,6 +54,10 @@ const HISUI_FORMS = {
   'palkia':     'palkia-origin',
   'giratina':   'giratina-origin',
   'shaymin':    'shaymin-sky',
+  'tornadus':   'tornadus-therian',
+  'thundurus':  'thundurus-therian',
+  'landorus':   'landorus-therian',
+  'enamorus':   'enamorus-therian',
 };
 
 // Pass ?region= hint when navigating to these regions so Pokemon.js can

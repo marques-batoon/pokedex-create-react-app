@@ -137,7 +137,10 @@ const CANONICAL_FORMS = {
   'indeedee': 'indeedee-male',
   'morpeko':  'morpeko-full-belly',
   'urshifu':  'urshifu-single-strike',
-  'enamorus': 'enamorus-incarnate',
+  'enamorus':  'enamorus-incarnate',
+  'tornadus':  'tornadus-incarnate',
+  'thundurus': 'thundurus-incarnate',
+  'landorus':  'landorus-incarnate',
 };
 
 // ─── Main Pokemon page ────────────────────────────────────────────────────────
