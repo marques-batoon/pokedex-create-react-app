@@ -233,20 +233,21 @@ class Challenge extends React.Component {
                   disabled={phase !== 'playing'}
                 >
                   <div className="challenge-card__glow" />
-                  <img
-                    src={mon.imgLink}
-                    alt={mon.name}
-                    className={`challenge-card__img${side === 'A' ? ' challenge-card__img--flipped' : ''}`}
-                  />
+                  <div className="challenge-card__img-wrap">
+                    <img
+                      src={mon.imgLink}
+                      alt={mon.name}
+                      className={`challenge-card__img${side === 'A' ? ' challenge-card__img--flipped' : ''}`}
+                    />
+                    {/* Stat overlay sits on top of the artwork */}
+                    {(phase === 'correct' || phase === 'wrong') && (
+                      <div className={`challenge-card__stat-reveal${cardState === 'win' || cardState === 'reveal' ? ' challenge-card__stat-reveal--winner' : ''}`}>
+                        <span className="challenge-card__stat-label">{stat.label}</span>
+                        <span className="challenge-card__stat-val">{val}</span>
+                      </div>
+                    )}
+                  </div>
                   <p className="challenge-card__name">{mon.name}</p>
-
-                  {/* Reveal stat value after guess */}
-                  {(phase === 'correct' || phase === 'wrong') && (
-                    <div className={`challenge-card__stat-reveal${cardState === 'win' || cardState === 'reveal' ? ' challenge-card__stat-reveal--winner' : ''}`}>
-                      <span className="challenge-card__stat-label">{stat.label}</span>
-                      <span className="challenge-card__stat-val">{val}</span>
-                    </div>
-                  )}
 
                   {cardState === 'win' && <span className="challenge-card__badge challenge-card__badge--win">✓</span>}
                   {cardState === 'lose' && <span className="challenge-card__badge challenge-card__badge--lose">✗</span>}
