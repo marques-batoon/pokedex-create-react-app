@@ -223,8 +223,7 @@ class Challenge extends React.Component {
                   <img
                     src={mon.imgLink}
                     alt={mon.name}
-                    className="challenge-card__img"
-                    style={side === 'A' ? { transform: 'scaleX(-1)' } : {}}
+                    className={`challenge-card__img${side === 'A' ? ' challenge-card__img--flipped' : ''}`}
                   />
                   <p className="challenge-card__name">{mon.name}</p>
 
