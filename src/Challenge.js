@@ -36,6 +36,7 @@ function buildMon(data) {
     id:      data.id,
     name:    data.name,
     imgLink: getArtwork(data),
+    sprite:  data.sprites.front_default || '',
     stats,
   };
 }
@@ -48,7 +49,7 @@ async function fetchMon(id) {
 }
 
 // ─── Game Over overlay ────────────────────────────────────────────────────────
-const GameOver = ({ streak, best, onRetry }) =>
+const GameOver = ({ streak, best, correctMon, onRetry }) =>
   ReactDOM.createPortal(
     <div className="challenge-gameover">
       <div className="challenge-gameover__rays">
@@ -57,6 +58,16 @@ const GameOver = ({ streak, best, onRetry }) =>
         ))}
       </div>
       <div className="challenge-gameover__box">
+        {correctMon && (
+          <div className="challenge-gameover__correct">
+            <img
+              src={correctMon.sprite}
+              alt={correctMon.name}
+              className="challenge-gameover__sprite"
+            />
+
+          </div>
+        )}
         <span className="challenge-gameover__label">Streak ended</span>
         <span className="challenge-gameover__score">{streak}</span>
         {best > 0 && (
@@ -85,6 +96,7 @@ class Challenge extends React.Component {
       best:       0,
       phase:      'playing',   // playing | correct | wrong | gameover
       chosenSide: null,        // 'A' | 'B' — which button the user pressed
+      correctMon: null,        // the mon the user should have picked
     };
   }
 
@@ -134,21 +146,23 @@ class Challenge extends React.Component {
       // Brief flash then chain: B becomes A
       setTimeout(() => this.startRound(monB, stat), 900);
     } else {
+      const correctMon = side === 'A' ? monB : monA;
       this.setState({
         phase:      'wrong',
         chosenSide: side,
+        correctMon,
       });
       setTimeout(() => this.setState({ phase: 'gameover' }), 1000);
     }
   };
 
   handleRetry = () => {
-    this.setState({ streak: 0, phase: 'playing', chosenSide: null });
+    this.setState({ streak: 0, phase: 'playing', chosenSide: null, correctMon: null });
     this.startRound(null, null);
   };
 
   render() {
-    const { monA, monB, stat, loading, streak, best, phase, chosenSide } = this.state;
+    const { monA, monB, stat, loading, streak, best, phase, chosenSide, correctMon } = this.state;
 
     if (loading || !monA || !monB || !stat) {
       return (
@@ -169,7 +183,7 @@ class Challenge extends React.Component {
     return (
       <div className="challenge-page">
         {phase === 'gameover' && (
-          <GameOver streak={streak} best={best} onRetry={this.handleRetry} />
+          <GameOver streak={streak} best={best} correctMon={correctMon} onRetry={this.handleRetry} />
         )}
 
         {/* Header bar */}
