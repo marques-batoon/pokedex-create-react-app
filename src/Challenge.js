@@ -58,6 +58,7 @@ const GameOver = ({ streak, best, correctMon, onRetry }) =>
         ))}
       </div>
       <div className="challenge-gameover__box">
+        <span className="challenge-gameover__label">Streak ended</span>
         {correctMon && (
           <div className="challenge-gameover__correct">
             <img
@@ -65,10 +66,8 @@ const GameOver = ({ streak, best, correctMon, onRetry }) =>
               alt={correctMon.name}
               className="challenge-gameover__sprite"
             />
-
           </div>
         )}
-        <span className="challenge-gameover__label">Streak ended</span>
         <span className="challenge-gameover__score">{streak}</span>
         {best > 0 && (
           <span className="challenge-gameover__best">
